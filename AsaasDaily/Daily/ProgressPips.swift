@@ -37,8 +37,9 @@ struct ProgressPips: View {
 }
 
 
-/// Progresso da rodada em 22 pt, para a barra de ferramentas: anel preenchido e o
-/// número de quem já falou no centro. Ocupa o espaço de um botão e diz o essencial.
+/// Progresso da rodada para a barra de ferramentas. O item da toolbar desenha um
+/// fundo em pílula, feito para conteúdo horizontal — um círculo sozinho lá dentro
+/// sobra espaço dos dois lados. Daí anel e contagem lado a lado.
 struct ProgressRing: View {
     let spoken: Int
     let total: Int
@@ -46,6 +47,18 @@ struct ProgressRing: View {
     private var fraction: Double { total == 0 ? 0 : Double(spoken) / Double(total) }
 
     var body: some View {
+        HStack(spacing: 7) {
+            ring
+            Text("\(spoken) de \(total)")
+                .font(.caption.weight(.medium))
+                .monospacedDigit()
+                .contentTransition(.numericText())
+                .foregroundStyle(.secondary)
+        }
+        .help("\(spoken) de \(total) já falaram")
+    }
+
+    private var ring: some View {
         ZStack {
             Circle()
                 .stroke(.quaternary, lineWidth: 3)
@@ -54,12 +67,7 @@ struct ProgressRing: View {
                 .stroke(.tint, style: StrokeStyle(lineWidth: 3, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .animation(.smooth, value: fraction)
-            Text("\(spoken)")
-                .font(.system(size: 9, weight: .bold))
-                .monospacedDigit()
-                .contentTransition(.numericText())
         }
-        .frame(width: 22, height: 22)
-        .help("\(spoken) de \(total) já falaram")
+        .frame(width: 16, height: 16)
     }
 }
