@@ -125,6 +125,12 @@ struct DailyView: View {
             .help("Próximo (→)")
         }
 
+        ToolbarItem(placement: .principal) {
+            if daily.totalCount > 0 {
+                ProgressRing(spoken: daily.spokenCount, total: daily.totalCount)
+            }
+        }
+
         ToolbarItem(placement: .primaryAction) {
             Picker("Visualização", selection: $settings.cardsViewMode) {
                 ForEach(CardsViewMode.allCases) { mode in

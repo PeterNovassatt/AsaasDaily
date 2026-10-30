@@ -71,11 +71,17 @@ struct DailyCommands: Commands {
                 }
             }
             .keyboardShortcut("r", modifiers: [.command, .shift])
-        }
 
-        CommandGroup(after: .toolbar) {
+            Divider()
+
+            // ⌘+ exige shift no teclado, então o sistema enxerga ⌘⇧=; registrar os
+            // dois jeitos é o que faz o atalho responder como o usuário espera.
             Button("Aumentar fonte") { settings.textScale = settings.textScale.increased() }
-                .keyboardShortcut("+", modifiers: .command)
+                .keyboardShortcut("=", modifiers: .command)
+                .disabled(!settings.textScale.canIncrease)
+
+            Button("Aumentar fonte ") { settings.textScale = settings.textScale.increased() }
+                .keyboardShortcut("+", modifiers: [.command, .shift])
                 .disabled(!settings.textScale.canIncrease)
 
             Button("Diminuir fonte") { settings.textScale = settings.textScale.decreased() }
@@ -85,5 +91,6 @@ struct DailyCommands: Commands {
             Button("Tamanho padrão") { settings.textScale = .padrao }
                 .keyboardShortcut("0", modifiers: .command)
         }
+
     }
 }
