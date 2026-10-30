@@ -20,6 +20,7 @@ struct ProgressPips: View {
                     .animation(.smooth, value: currentId)
             }
         }
+        .padding(.horizontal, 4)
         .help(summary)
     }
 

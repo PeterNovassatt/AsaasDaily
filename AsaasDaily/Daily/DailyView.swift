@@ -19,9 +19,9 @@ struct DailyView: View {
                                   participant: participant,
                                   namespace: stageNamespace,
                                   onExit: { withAnimation(.smooth) { daily.isPresenting = false } })
-                    .transition(.blurReplace)
+                    .transition(.opacity)
             } else {
-                splitView.transition(.blurReplace)
+                splitView.transition(.opacity)
             }
         }
         .dynamicTypeSize(settings.textScale.dynamicTypeSize)
@@ -75,6 +75,7 @@ struct DailyView: View {
             ParticipantDetail(participant: participant,
                               isSpeaking: participant.id == daily.speaker?.id,
                               mode: settings.cardsViewMode,
+                              namespace: stageNamespace,
                               isRefreshing: daily.isRefreshingSpeaker,
                               onRefresh: { Task { await daily.refreshSpeaker() } },
                               onOpen: open)
@@ -122,12 +123,6 @@ struct DailyView: View {
             }
             .disabled(daily.participants.isEmpty || daily.isFinished)
             .help("Próximo (→)")
-        }
-
-        ToolbarItem(placement: .principal) {
-            if daily.totalCount > 0 {
-                ProgressPips(participants: daily.participants, currentId: daily.speaker?.id)
-            }
         }
 
         ToolbarItem(placement: .primaryAction) {

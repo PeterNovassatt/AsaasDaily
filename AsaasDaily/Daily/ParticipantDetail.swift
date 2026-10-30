@@ -5,6 +5,9 @@ struct ParticipantDetail: View {
     let participant: Participant
     let isSpeaking: Bool
     var mode: CardsViewMode = .list
+    /// Mesmo namespace do modo apresentação: é o que faz o avatar e o nome
+    /// crescerem daqui para o palco, em vez de a tela trocar de uma vez.
+    var namespace: Namespace.ID
     var isRefreshing = false
     var onRefresh: () -> Void = {}
     var onOpen: (JiraIssue) -> Void = { _ in }
@@ -82,6 +85,7 @@ struct ParticipantDetail: View {
     private var header: some View {
         HStack(spacing: 14) {
             Avatar(person: participant.person, size: 52)
+                .matchedGeometryEffect(id: participant.id, in: namespace)
                 .overlay {
                     if isSpeaking {
                         Circle().strokeBorder(Color.accentColor, lineWidth: 2)
@@ -98,6 +102,7 @@ struct ParticipantDetail: View {
 
                 Text(participant.name)
                     .font(.system(size: 26, weight: .semibold))
+                    .matchedGeometryEffect(id: "name-\(participant.id)", in: namespace)
                     .lineLimit(1)
 
                 Text(participant.cardSummary)
