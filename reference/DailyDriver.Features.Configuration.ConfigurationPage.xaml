@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+     xmlns:configuration="clr-namespace:DailyDriver.Features.Configuration"
+     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+     x:Class="DailyDriver.Features.Configuration.ConfigurationPage"
+     NavigationPage.HasNavigationBar="True"
+     x:DataType="configuration:ConfigurationPageViewModel"
+     BackgroundColor="{StaticResource BgCanvas}"
+     x:Name="Root">
+
+    <NavigationPage.TitleView>
+        <Label
+            Text="Configurações"
+            TextColor="{StaticResource TextPrimary}"
+            VerticalOptions="Center"
+            FontSize="{StaticResource Fs2xl}"
+            FontAttributes="Bold"/>
+    </NavigationPage.TitleView>
+
+    <Grid RowDefinitions="*, Auto" Padding="24,20,24,0" RowSpacing="{StaticResource Sp16}">
+
+        <!-- Duas colunas: credenciais + projetos | participantes -->
+        <Grid Grid.Row="0" ColumnDefinitions="*, 420" ColumnSpacing="{StaticResource Sp16}">
+
+            <Grid Grid.Column="0" RowDefinitions="Auto, *" RowSpacing="{StaticResource Sp16}">
+
+                <!-- ── Credenciais ── -->
+                <Border
+                    Grid.Row="0"
+                    StrokeShape="RoundRectangle 18"
+                    Stroke="{StaticResource StrokeSubtle}"
+                    StrokeThickness="1"
+                    BackgroundColor="{StaticResource BgCard}"
+                    Padding="20,18">
+
+                    <VerticalStackLayout Spacing="{StaticResource Sp12}">
+
+                        <Label
+                            Text="Credenciais"
+                            TextColor="{StaticResource TextSecondary}"
+                            FontSize="{StaticResource FsMd}"/>
+
+                        <Grid ColumnDefinitions="*, *" ColumnSpacing="{StaticResource Sp12}">
+
+                            <VerticalStackLayout Grid.Column="0" Spacing="{StaticResource Sp6}">
+                                <Label Text="E-mail Atlassian" TextColor="{StaticResource TextMuted}" FontSize="{StaticResource FsMd}" FontAttributes="Bold"/>
+                                <Border
+                                    StrokeShape="RoundRectangle 12"
+                                    Stroke="{StaticResource StrokeMid}"
+                                    StrokeThickness="1"
+                                    BackgroundColor="{StaticResource BgSubtle}"
+                                    Padding="12,0">
+                                    <Entry
+                                        Placeholder="nome@empresa.com.br"
+                                        Text="{Binding Email}"
+                                        BackgroundColor="Transparent"
+                                        TextColor="{StaticResource TextPrimary}"
+                                        PlaceholderColor="{StaticResource TextSecondary}"
+                                        FontSize="{StaticResource FsBase}"
+                                        Keyboard="Email"/>
+                                </Border>
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="{StaticResource Sp6}">
+                                <Label Text="API Token" TextColor="{StaticResource TextMuted}" FontSize="{StaticResource FsMd}" FontAttributes="Bold"/>
+                                <Border
+                                    StrokeShape="RoundRectangle 12"
+                                    Stroke="{StaticResource StrokeMid}"
+                                    StrokeThickness="1"
+                                    BackgroundColor="{StaticResource BgSubtle}"
+                                    Padding="12,0">
+                                    <Entry
+                                        Placeholder="Token gerado em id.atlassian.com"
+                                        Text="{Binding ApiToken}"
+                                        BackgroundColor="Transparent"
+                                        TextColor="{StaticResource TextPrimary}"
+                                        PlaceholderColor="{StaticResource TextSecondary}"
+                                        FontSize="{StaticResource FsBase}"
+                                        IsPassword="True"/>
+                                </Border>
+                            </VerticalStackLayout>
+
+                        </Grid>
+
+                        <Label
+                            Text="id.atlassian.com → Security → Create and manage API tokens"
+                            TextColor="{StaticResource TextSecondary}"
+                            FontSize="{StaticResource FsXs}"/>
+
+                    </VerticalStackLayout>
+
+                </Border>
+
+                <!-- ── Projetos ── -->
+                <Border
+                    Grid.Row="1"
+                    StrokeShape="RoundRectangle 18"
+                    Stroke="{StaticResource StrokeSubtle}"
+                    StrokeThickness="1"
+                    BackgroundColor="{StaticResource BgCard}"
+                    Padding="20,18">
+
+                    <Grid RowDefinitions="Auto, Auto, Auto, *" RowSpacing="{StaticResource Sp12}">
+
+                        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto">
+
+                            <Label
+                                Grid.Column="0"
+                                Text="Projetos"
+                                TextColor="{StaticResource TextSecondary}"
+                                FontSize="{StaticResource FsMd}"
+                                VerticalOptions="Center"/>
+
+                            <ActivityIndicator
+                                Grid.Column="1"
+                                IsRunning="{Binding IsLoadingProjects}"
+                                IsVisible="{Binding IsLoadingProjects}"
+                                HeightRequest="18"
+                                WidthRequest="18"
+                                HorizontalOptions="Start"
+                                Margin="10,0,0,0"
+                                Color="{StaticResource BrandLight}"/>
+
+                            <Label
+                                Grid.Column="2"
+                                Text="{Binding ProjectCount}"
+                                TextColor="{StaticResource TextSecondary}"
+                                FontSize="{StaticResource FsXs}"
+                                VerticalOptions="Center"/>
+
+                        </Grid>
+
+                        <Label
+                            Grid.Row="1"
+                            Text="{Binding ErrorMessage}"
+                            IsVisible="{Binding HasError}"
+                            TextColor="{StaticResource ColorDangerLight}"
+                            FontSize="{StaticResource FsMd}"/>
+
+                        <!-- Busca + filtro por categoria -->
+                        <Grid Grid.Row="2" RowDefinitions="Auto, Auto" RowSpacing="{StaticResource Sp10}">
+
+                            <Border
+                                Grid.Row="0"
+                                StrokeShape="RoundRectangle 12"
+                                Stroke="{StaticResource StrokeMid}"
+                                StrokeThickness="1"
+                                BackgroundColor="{StaticResource BgSubtle}"
+                                Padding="12,0"
+                                IsVisible="{Binding HasProjects}">
+                                <Entry
+                                    Placeholder="Buscar projeto..."
+                                    Text="{Binding SearchText}"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{StaticResource TextPrimary}"
+                                    PlaceholderColor="{StaticResource TextSecondary}"
+                                    FontSize="{StaticResource FsBase}"/>
+                            </Border>
+
+                            <ScrollView
+                                Grid.Row="1"
+                                IsVisible="{Binding HasCategories}"
+                                Orientation="Horizontal"
+                                HorizontalScrollBarVisibility="Never">
+
+                                <HorizontalStackLayout
+                                    BindableLayout.ItemsSource="{Binding Categories}"
+                                    Spacing="{StaticResource Sp6}">
+
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="configuration:ConfigurationCategoryViewModel">
+
+                                            <Border
+                                                Padding="12,6"
+                                                StrokeShape="RoundRectangle 10"
+                                                StrokeThickness="0"
+                                                BackgroundColor="{StaticResource TintNeutral}">
+
+                                                <Border.Triggers>
+                                                    <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter Property="BackgroundColor" Value="{StaticResource BrandPrimary}"/>
+                                                    </DataTrigger>
+                                                </Border.Triggers>
+
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding SelectCommand}"/>
+                                                </Border.GestureRecognizers>
+
+                                                <Label
+                                                    Text="{Binding Name}"
+                                                    TextColor="{StaticResource TextMuted}"
+                                                    FontSize="{StaticResource FsXs}"
+                                                    FontAttributes="Bold"
+                                                    VerticalOptions="Center">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                            <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+
+                                            </Border>
+
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+
+                                </HorizontalStackLayout>
+
+                            </ScrollView>
+
+                        </Grid>
+
+                        <!--
+                            CollectionView (não FlexLayout + BindableLayout): com 300+ projetos
+                            a virtualização é o que mantém a tela leve.
+                        -->
+                        <CollectionView
+                            Grid.Row="3"
+                            ItemsSource="{Binding Projects}"
+                            IsVisible="{Binding HasProjects}"
+                            VerticalScrollBarVisibility="Never">
+
+                            <CollectionView.ItemsLayout>
+                                <GridItemsLayout
+                                    Orientation="Vertical"
+                                    Span="4"
+                                    HorizontalItemSpacing="8"
+                                    VerticalItemSpacing="8"/>
+                            </CollectionView.ItemsLayout>
+
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="configuration:ConfigurationProjectViewModel">
+
+                                    <Border
+                                        Padding="10,8"
+                                        StrokeShape="RoundRectangle 12"
+                                        StrokeThickness="1"
+                                        Stroke="{StaticResource StrokeMid}"
+                                        HeightRequest="64"
+                                        BackgroundColor="{StaticResource BgSubtle}">
+
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{StaticResource BgSelected}"/>
+                                                <Setter Property="Stroke" Value="{StaticResource StrokeSelected}"/>
+                                            </DataTrigger>
+                                        </Border.Triggers>
+
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding ToggleCommand}"/>
+                                        </Border.GestureRecognizers>
+
+                                        <VerticalStackLayout Spacing="{StaticResource Sp2}" VerticalOptions="Center">
+                                            <Label
+                                                Text="{Binding Key}"
+                                                TextColor="{StaticResource TextPrimary}"
+                                                FontSize="{StaticResource FsMd}"
+                                                FontAttributes="Bold"
+                                                HorizontalOptions="Center"/>
+                                            <Label
+                                                Text="{Binding Name}"
+                                                TextColor="{StaticResource TextSecondary}"
+                                                FontSize="{StaticResource FsXs}"
+                                                HorizontalOptions="Center"
+                                                HorizontalTextAlignment="Center"
+                                                MaxLines="2"
+                                                LineBreakMode="TailTruncation"/>
+                                        </VerticalStackLayout>
+
+                                    </Border>
+
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+
+                        </CollectionView>
+
+                    </Grid>
+
+                </Border>
+
+            </Grid>
+
+            <!-- ── Participantes ── -->
+            <Border
+                Grid.Column="1"
+                StrokeShape="RoundRectangle 18"
+                Stroke="{StaticResource StrokeSubtle}"
+                StrokeThickness="1"
+                BackgroundColor="{StaticResource BgCard}"
+                Padding="20,18">
+
+                <Grid RowDefinitions="Auto, *" RowSpacing="{StaticResource Sp12}">
+
+                    <Grid Grid.Row="0" ColumnDefinitions="Auto, *">
+
+                        <Label
+                            Grid.Column="0"
+                            Text="Participantes"
+                            TextColor="{StaticResource TextSecondary}"
+                            FontSize="{StaticResource FsMd}"
+                            VerticalOptions="Center"/>
+
+                        <ActivityIndicator
+                            Grid.Column="1"
+                            IsRunning="{Binding IsLoadingPersons}"
+                            IsVisible="{Binding IsLoadingPersons}"
+                            HeightRequest="18"
+                            WidthRequest="18"
+                            HorizontalOptions="Start"
+                            Margin="10,0,0,0"
+                            Color="{StaticResource BrandLight}"/>
+
+                    </Grid>
+
+                    <CollectionView
+                        Grid.Row="1"
+                        ItemsSource="{Binding Persons}"
+                        VerticalScrollBarVisibility="Never"
+                        IsVisible="{Binding IsLoadingPersons, Converter={toolkit:InvertedBoolConverter}}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="configuration:ConfigurationAtlassianPersonViewModel">
+                                <configuration:ConfigurationAtlassianPersonView BindingContext="{Binding}"/>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                </Grid>
+
+            </Border>
+
+        </Grid>
+
+        <!-- Botão salvar fixo -->
+        <Grid Grid.Row="1" Padding="0,4,0,20">
+            <Button
+                Text="Salvar configuração"
+                Command="{Binding SaveCommand}"
+                BackgroundColor="{StaticResource BrandPrimary}"
+                TextColor="{StaticResource TextPrimary}"
+                CornerRadius="28"
+                FontAttributes="Bold"
+                FontSize="{StaticResource FsBody}"
+                HeightRequest="56"/>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

@@ -1,0 +1,1188 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+     xmlns:whoWillTalk="clr-namespace:DailyDriver"
+     xmlns:material="clr-namespace:Asaas.Styleguide.Shared.Material"
+     xmlns:material1="clr-namespace:DailyDriver.Resources.Material"
+     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+     xmlns:issue="clr-namespace:DailyDriver.Atlassian.Dtos.Issue"
+     xmlns:kanban="clr-namespace:DailyDriver.Features.Kanban"
+     x:Class="DailyDriver.MainPage"
+     x:DataType="whoWillTalk:MainPageViewModel"
+     x:Name="Page"
+     BackgroundColor="{StaticResource BgCanvas}"
+     NavigationPage.HasNavigationBar="False">
+
+    <!--
+        Atalhos de teclado: no Mac Catalyst os aceleradores vivem na barra de menus,
+        que é também onde o usuário os descobre.
+    -->
+    <ContentPage.MenuBarItems>
+        <MenuBarItem Text="Daily">
+
+            <MenuFlyoutItem Text="Próximo" Command="{Binding NextCommand}">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Cmd" Key="N"/>
+                </MenuFlyoutItem.KeyboardAccelerators>
+            </MenuFlyoutItem>
+
+            <MenuFlyoutItem Text="Voltar para quem já falou" Command="{Binding PreviousCommand}">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Cmd" Key="B"/>
+                </MenuFlyoutItem.KeyboardAccelerators>
+            </MenuFlyoutItem>
+
+            <MenuFlyoutItem Text="Pular (vai para o fim da fila)" Command="{Binding SkipCommand}">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Cmd" Key="K"/>
+                </MenuFlyoutItem.KeyboardAccelerators>
+            </MenuFlyoutItem>
+
+            <MenuFlyoutSeparator/>
+
+            <MenuFlyoutItem Text="Atualizar cards de quem está falando" Command="{Binding RefreshSpeakerCommand}">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Cmd" Key="R"/>
+                </MenuFlyoutItem.KeyboardAccelerators>
+            </MenuFlyoutItem>
+
+            <MenuFlyoutItem Text="Nova rodada" Command="{Binding ResetCommand}">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Cmd,Shift" Key="R"/>
+                </MenuFlyoutItem.KeyboardAccelerators>
+            </MenuFlyoutItem>
+
+            <MenuFlyoutSeparator/>
+
+            <MenuFlyoutItem Text="Falar o nome (voz)" Command="{Binding ToggleSpeechCommand}">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Cmd" Key="M"/>
+                </MenuFlyoutItem.KeyboardAccelerators>
+            </MenuFlyoutItem>
+
+            <MenuFlyoutItem Text="Aumentar fonte" Command="{Binding IncreaseFontScaleCommand}">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Cmd" Key="+"/>
+                </MenuFlyoutItem.KeyboardAccelerators>
+            </MenuFlyoutItem>
+
+            <MenuFlyoutItem Text="Diminuir fonte" Command="{Binding DecreaseFontScaleCommand}">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Cmd" Key="-"/>
+                </MenuFlyoutItem.KeyboardAccelerators>
+            </MenuFlyoutItem>
+
+            <MenuFlyoutSeparator/>
+
+            <MenuFlyoutItem Text="Configurações" Clicked="ImageButton_OnClicked">
+                <MenuFlyoutItem.KeyboardAccelerators>
+                    <KeyboardAccelerator Modifiers="Cmd" Key=","/>
+                </MenuFlyoutItem.KeyboardAccelerators>
+            </MenuFlyoutItem>
+
+        </MenuBarItem>
+    </ContentPage.MenuBarItems>
+
+    <Grid RowDefinitions="72, Auto, *, Auto">
+
+        <!-- ═══════════ TOP BAR ═══════════ -->
+        <Grid
+            Grid.Row="0"
+            ColumnDefinitions="Auto, *, Auto, Auto, Auto"
+            Padding="{StaticResource PadPage}"
+            BackgroundColor="{StaticResource BgBase}">
+
+            <!-- Marca -->
+            <HorizontalStackLayout Grid.Column="0" Spacing="{StaticResource Sp10}" VerticalOptions="Center">
+
+                <Border
+                    HeightRequest="36"
+                    WidthRequest="36"
+                    StrokeShape="RoundRectangle 11"
+                    StrokeThickness="0"
+                    Padding="5"
+                    VerticalOptions="Center">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Offset="0" Color="{StaticResource BrandLight}"/>
+                            <GradientStop Offset="1" Color="{StaticResource BrandDeep}"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Image
+                        Source="dailydriver_mark"
+                        Aspect="AspectFit"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"/>
+                </Border>
+
+                <Label
+                    Text="DailyDriver"
+                    TextColor="{StaticResource TextPrimary}"
+                    FontSize="{DynamicResource Fs2xl}"
+                    FontAttributes="Bold"
+                    CharacterSpacing="-0.5"
+                    VerticalOptions="Center"/>
+
+            </HorizontalStackLayout>
+
+            <!-- Board carregado + progresso da rodada -->
+            <HorizontalStackLayout
+                Grid.Column="1"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Spacing="{StaticResource Sp10}"
+                IsVisible="{Binding CanDisplayOptions}">
+
+                <Border
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="{StaticResource StrokeMid}"
+                    StrokeThickness="1"
+                    BackgroundColor="{StaticResource BgSubtle}"
+                    Padding="14,7"
+                    VerticalOptions="Center">
+                    <HorizontalStackLayout Spacing="{StaticResource Sp8}" VerticalOptions="Center">
+                        <Label
+                            FontFamily="MaterialDesignIcons"
+                            Text="{x:Static material:MaterialIcon.ViewDashboardOutline}"
+                            TextColor="{StaticResource TextSecondary}"
+                            FontSize="{DynamicResource FsMd}"
+                            VerticalOptions="Center"/>
+                        <Label
+                            Text="{Binding ProjectLabel}"
+                            TextColor="{StaticResource TextMuted}"
+                            FontSize="{DynamicResource FsMd}"
+                            FontAttributes="Bold"
+                            CharacterSpacing="0.5"
+                            VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </Border>
+
+                <Border
+                    StrokeShape="RoundRectangle 12"
+                    StrokeThickness="0"
+                    BackgroundColor="{StaticResource TintBrand}"
+                    Padding="14,7"
+                    VerticalOptions="Center">
+                    <Label
+                        Text="{Binding ProgressText}"
+                        TextColor="{StaticResource BrandLight}"
+                        FontSize="{DynamicResource FsMd}"
+                        FontAttributes="Bold"
+                        CharacterSpacing="0.5"
+                        VerticalOptions="Center"/>
+                </Border>
+
+            </HorizontalStackLayout>
+
+            <!-- Controle de escala de fonte: A⁻ · A · A⁺ -->
+            <Border
+                Grid.Column="2"
+                StrokeShape="RoundRectangle 14"
+                Stroke="{StaticResource StrokeMid}"
+                StrokeThickness="1"
+                BackgroundColor="{StaticResource BgSubtle}"
+                HeightRequest="{StaticResource IconBtn}"
+                VerticalOptions="Center"
+                Margin="0,0,10,0"
+                Padding="2,0">
+
+                <HorizontalStackLayout VerticalOptions="Center" Spacing="0">
+
+                    <Label
+                        Text="A"
+                        FontSize="{DynamicResource FsSm}"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextMuted}"
+                        VerticalOptions="Center"
+                        Padding="12,0,10,0">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding CanDecreaseFontScale}" Value="False">
+                                <Setter Property="Opacity" Value="0.3"/>
+                            </DataTrigger>
+                        </Label.Triggers>
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding DecreaseFontScaleCommand}"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+
+                    <BoxView WidthRequest="1" HeightRequest="18" BackgroundColor="{StaticResource StrokeMid}" VerticalOptions="Center"/>
+
+                    <Label
+                        Text="A"
+                        FontSize="{DynamicResource FsTag}"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextMuted}"
+                        Opacity="0.3"
+                        VerticalOptions="Center"
+                        Padding="10,0">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsFontScaleDefault}" Value="False">
+                                <Setter Property="TextColor" Value="{StaticResource BrandLight}"/>
+                                <Setter Property="Opacity" Value="1"/>
+                            </DataTrigger>
+                        </Label.Triggers>
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ResetFontScaleCommand}"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+
+                    <BoxView WidthRequest="1" HeightRequest="18" BackgroundColor="{StaticResource StrokeMid}" VerticalOptions="Center"/>
+
+                    <Label
+                        Text="A"
+                        FontSize="{DynamicResource FsLg}"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextMuted}"
+                        VerticalOptions="Center"
+                        Padding="10,0,12,0">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding CanIncreaseFontScale}" Value="False">
+                                <Setter Property="Opacity" Value="0.3"/>
+                            </DataTrigger>
+                        </Label.Triggers>
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding IncreaseFontScaleCommand}"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+
+                </HorizontalStackLayout>
+
+            </Border>
+
+            <!-- Speech toggle -->
+            <Border
+                Grid.Column="3"
+                HeightRequest="{StaticResource SpeechBtn}"
+                WidthRequest="{StaticResource SpeechBtn}"
+                StrokeShape="RoundRectangle 22"
+                Stroke="{StaticResource StrokeMid}"
+                StrokeThickness="1"
+                BackgroundColor="{StaticResource BgSubtle}"
+                VerticalOptions="Center"
+                Margin="0,0,10,0">
+
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding IsSpeechEnabled}" Value="True">
+                        <Setter Property="BackgroundColor" Value="{StaticResource ColorSuccess}"/>
+                        <Setter Property="Stroke" Value="{StaticResource ColorSuccess}"/>
+                    </DataTrigger>
+                </Border.Triggers>
+
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ToggleSpeechCommand}"/>
+                </Border.GestureRecognizers>
+
+                <Label
+                    FontFamily="MaterialDesignIcons"
+                    Text="{x:Static material:MaterialIcon.MicrophoneOff}"
+                    TextColor="{StaticResource TextMuted}"
+                    FontSize="{DynamicResource FsIcon}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center">
+
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsSpeechEnabled}" Value="True">
+                            <Setter Property="Text" Value="{x:Static material:MaterialIcon.Microphone}"/>
+                            <Setter Property="TextColor" Value="{StaticResource BgBase}"/>
+                        </DataTrigger>
+                    </Label.Triggers>
+
+                </Label>
+
+            </Border>
+
+            <!-- Settings -->
+            <Border
+                Grid.Column="4"
+                HeightRequest="{StaticResource IconBtn}"
+                WidthRequest="{StaticResource IconBtn}"
+                StrokeShape="RoundRectangle 14"
+                Stroke="{StaticResource StrokeMid}"
+                StrokeThickness="1"
+                BackgroundColor="{StaticResource BgSubtle}"
+                VerticalOptions="Center">
+                <ImageButton
+                    HeightRequest="22"
+                    WidthRequest="22"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    BackgroundColor="Transparent"
+                    Clicked="ImageButton_OnClicked">
+                    <ImageButton.Source>
+                        <material1:MaterialDesignIconSource Glyph="{x:Static material:MaterialIcon.Cog}" Color="{StaticResource TextMuted}"/>
+                    </ImageButton.Source>
+                </ImageButton>
+            </Border>
+
+        </Grid>
+
+        <!-- ═══════════ PROGRESS BAR ═══════════ -->
+        <Border
+            Grid.Row="1"
+            IsVisible="{Binding CanDisplayOptions}"
+            HeightRequest="3"
+            StrokeThickness="0"
+            BackgroundColor="{StaticResource BgSubtle}">
+            <ProgressBar
+                Progress="{Binding ProgressFraction}"
+                ProgressColor="{StaticResource BrandLight}"
+                BackgroundColor="Transparent"
+                HeightRequest="3"/>
+        </Border>
+
+        <!-- ═══════════ CONTEÚDO ═══════════ -->
+        <Grid Grid.Row="2">
+
+            <!-- Spinner -->
+            <VerticalStackLayout
+                IsVisible="{Binding IsLoading}"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                Spacing="{StaticResource Sp20}">
+                <ActivityIndicator IsRunning="True" Color="{StaticResource BrandLight}" HeightRequest="56" WidthRequest="56"/>
+                <Label
+                    Text="Carregando sprint..."
+                    TextColor="{StaticResource TextMuted}"
+                    FontSize="{DynamicResource FsXl}"
+                    HorizontalTextAlignment="Center"
+                    FontAttributes="Bold"
+                    CharacterSpacing="0.5"/>
+            </VerticalStackLayout>
+
+            <!-- Não configurado -->
+            <VerticalStackLayout
+                IsVisible="{Binding IsNotConfigured}"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                Spacing="{StaticResource Sp16}"
+                Padding="48,0">
+                <Label Text="◆" TextColor="{StaticResource BrandLight}" FontSize="{DynamicResource FsJumbo}" HorizontalTextAlignment="Center" Opacity="0.6"/>
+                <Label Text="Configure o app" TextColor="{StaticResource TextPrimary}" FontSize="{DynamicResource Fs4xl}" FontAttributes="Bold" HorizontalTextAlignment="Center" CharacterSpacing="-0.5"/>
+                <Label Text="Toque na engrenagem no canto superior direito para configurar." TextColor="{StaticResource TextSecondary}" FontSize="{DynamicResource FsBody}" HorizontalTextAlignment="Center"/>
+            </VerticalStackLayout>
+
+            <!-- Daily concluída -->
+            <VerticalStackLayout
+                IsVisible="{Binding IsFinished}"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                Spacing="{StaticResource Sp24}"
+                Padding="48,0">
+
+                <Border
+                    HeightRequest="{StaticResource AvatarLg}"
+                    WidthRequest="{StaticResource AvatarLg}"
+                    StrokeShape="RoundRectangle 70"
+                    Stroke="{StaticResource ColorSuccess}"
+                    StrokeThickness="2"
+                    BackgroundColor="#0A1D14">
+                    <Label
+                        Text="✓"
+                        TextColor="{StaticResource ColorSuccess}"
+                        FontSize="{DynamicResource FsGiant}"
+                        FontAttributes="Bold"
+                        HorizontalTextAlignment="Center"
+                        VerticalTextAlignment="Center"/>
+                </Border>
+
+                <Label
+                    Text="Daily concluída"
+                    TextColor="{StaticResource TextPrimary}"
+                    FontSize="{DynamicResource Fs5xl}"
+                    FontAttributes="Bold"
+                    HorizontalTextAlignment="Center"
+                    CharacterSpacing="-1"/>
+
+                <Label
+                    Text="Todo mundo falou. Bom trabalho."
+                    TextColor="{StaticResource TextSecondary}"
+                    FontSize="{DynamicResource FsBody}"
+                    HorizontalTextAlignment="Center"/>
+
+                <Button
+                    Text="Nova rodada"
+                    Command="{Binding ResetCommand}"
+                    BackgroundColor="{StaticResource BrandLight}"
+                    TextColor="{StaticResource BgBase}"
+                    CornerRadius="32"
+                    WidthRequest="260"
+                    HeightRequest="{StaticResource ActionBtn}"
+                    FontAttributes="Bold"
+                    FontSize="{DynamicResource FsBody}"
+                    Margin="0,16,0,0"/>
+
+            </VerticalStackLayout>
+
+            <!-- ═══════════ DASHBOARD ═══════════ -->
+            <Grid
+                IsVisible="{Binding ShowContent}"
+                RowDefinitions="Auto, *"
+                Padding="32,20,32,8"
+                RowSpacing="{StaticResource Sp16}">
+
+                <!-- ── FAIXA DE KPIs ── -->
+                <Grid
+                    Grid.Row="0"
+                    ColumnDefinitions="*, *, *, *"
+                    ColumnSpacing="{StaticResource Sp12}">
+
+                    <Border
+                        Grid.Column="0"
+                        StrokeShape="RoundRectangle 18"
+                        Stroke="{StaticResource StrokeSubtle}"
+                        StrokeThickness="1"
+                        BackgroundColor="{StaticResource BgCard}"
+                        Padding="{StaticResource PadStatCard}">
+                        <VerticalStackLayout Spacing="{StaticResource Sp6}">
+                            <Label Text="Code review" TextColor="{StaticResource TextSecondary}" FontSize="{DynamicResource FsMd}"/>
+                            <Label
+                                Text="{Binding CodeReviewCount}"
+                                TextColor="{StaticResource ColorCodeReview}"
+                                FontSize="{DynamicResource Fs4xl}"
+                                FontAttributes="Bold"
+                                CharacterSpacing="-1.5"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border
+                        Grid.Column="1"
+                        StrokeShape="RoundRectangle 18"
+                        Stroke="{StaticResource StrokeSubtle}"
+                        StrokeThickness="1"
+                        BackgroundColor="{StaticResource BgCard}"
+                        Padding="{StaticResource PadStatCard}">
+                        <VerticalStackLayout Spacing="{StaticResource Sp6}">
+                            <Label Text="In progress" TextColor="{StaticResource TextSecondary}" FontSize="{DynamicResource FsMd}"/>
+                            <Label
+                                Text="{Binding InProgressCount}"
+                                TextColor="{StaticResource ColorInProgress}"
+                                FontSize="{DynamicResource Fs4xl}"
+                                FontAttributes="Bold"
+                                CharacterSpacing="-1.5"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border
+                        Grid.Column="2"
+                        StrokeShape="RoundRectangle 18"
+                        Stroke="{StaticResource StrokeSubtle}"
+                        StrokeThickness="1"
+                        BackgroundColor="{StaticResource BgCard}"
+                        Padding="{StaticResource PadStatCard}">
+                        <VerticalStackLayout Spacing="{StaticResource Sp6}">
+                            <Label Text="Com flag" TextColor="{StaticResource TextSecondary}" FontSize="{DynamicResource FsMd}"/>
+                            <HorizontalStackLayout Spacing="{StaticResource Sp8}">
+                                <Label
+                                    Text="{Binding FlaggedCount}"
+                                    TextColor="{StaticResource ColorDangerLight}"
+                                    FontSize="{DynamicResource Fs4xl}"
+                                    FontAttributes="Bold"
+                                    CharacterSpacing="-1.5"/>
+                                <Label
+                                    Text="{Binding FlaggedSubtitle}"
+                                    TextColor="{StaticResource TextSecondary}"
+                                    FontSize="{DynamicResource FsMd}"
+                                    VerticalOptions="End"
+                                    Margin="0,0,0,8"/>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border
+                        Grid.Column="3"
+                        StrokeShape="RoundRectangle 18"
+                        Stroke="{StaticResource StrokeSubtle}"
+                        StrokeThickness="1"
+                        BackgroundColor="{StaticResource BgCard}"
+                        Padding="{StaticResource PadStatCard}">
+                        <VerticalStackLayout Spacing="{StaticResource Sp6}">
+                            <Label Text="Já falaram" TextColor="{StaticResource TextSecondary}" FontSize="{DynamicResource FsMd}"/>
+                            <HorizontalStackLayout Spacing="{StaticResource Sp8}">
+                                <Label
+                                    Text="{Binding SpokenCount}"
+                                    TextColor="{StaticResource TextPrimary}"
+                                    FontSize="{DynamicResource Fs4xl}"
+                                    FontAttributes="Bold"
+                                    CharacterSpacing="-1.5"/>
+                                <Label
+                                    Text="{Binding PersonTotalLabel}"
+                                    TextColor="{StaticResource TextSecondary}"
+                                    FontSize="{DynamicResource FsMd}"
+                                    VerticalOptions="End"
+                                    Margin="0,0,0,8"/>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                </Grid>
+
+                <!-- ── DUAS COLUNAS ── -->
+                <Grid
+                    Grid.Row="1"
+                    ColumnDefinitions="*, 400"
+                    ColumnSpacing="{StaticResource Sp16}">
+
+                    <!-- ═══ COLUNA PRINCIPAL ═══ -->
+                    <Grid Grid.Column="0" x:Name="SpeakerStage" RowDefinitions="Auto, Auto, *" RowSpacing="{StaticResource Sp12}">
+
+                        <!-- Estado vazio -->
+                        <VerticalStackLayout
+                            Grid.Row="0"
+                            Grid.RowSpan="3"
+                            IsVisible="{Binding HasPersonTalking, Converter={toolkit:InvertedBoolConverter}}"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                            Spacing="{StaticResource Sp20}">
+
+                            <Image
+                                Source="dailydriver_logo"
+                                HeightRequest="300"
+                                WidthRequest="450"
+                                Aspect="AspectFit"/>
+
+                            <Label
+                                Text="Pronto para começar?"
+                                TextColor="{StaticResource TextPrimary}"
+                                FontSize="{DynamicResource Fs4xl}"
+                                FontAttributes="Bold"
+                                CharacterSpacing="-1"
+                                HorizontalTextAlignment="Center"/>
+
+                        </VerticalStackLayout>
+
+                        <!-- Painel do speaker -->
+                        <Border
+                            Grid.Row="0"
+                            IsVisible="{Binding HasPersonTalking}"
+                            StrokeShape="RoundRectangle 20"
+                            Stroke="{StaticResource StrokeMid}"
+                            StrokeThickness="1"
+                            Padding="20,16">
+
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Offset="0" Color="{StaticResource BgGradFrom}"/>
+                                    <GradientStop Offset="1" Color="{StaticResource BgCard}"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+
+                            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="{StaticResource Sp16}">
+
+                                <Border
+                                    Grid.Column="0"
+                                    HeightRequest="{StaticResource AvatarMd}"
+                                    WidthRequest="{StaticResource AvatarMd}"
+                                    StrokeShape="RoundRectangle 32"
+                                    Stroke="{StaticResource BrandPrimary}"
+                                    StrokeThickness="2"
+                                    BackgroundColor="{StaticResource BgAvatar}"
+                                    VerticalOptions="Center">
+                                    <Image Source="{Binding PersonTalking.Source}" Aspect="AspectFill" HeightRequest="64" WidthRequest="64"/>
+                                </Border>
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="{StaticResource Sp4}" VerticalOptions="Center">
+                                    <Label
+                                        Text="FALANDO AGORA"
+                                        TextColor="{StaticResource BrandLight}"
+                                        FontSize="{DynamicResource FsXs}"
+                                        FontAttributes="Bold"
+                                        CharacterSpacing="2.5"/>
+                                    <Label
+                                        Text="{Binding PersonTalking.Name}"
+                                        TextColor="{StaticResource TextPrimary}"
+                                        FontSize="{DynamicResource Fs3xl}"
+                                        FontAttributes="Bold"
+                                        CharacterSpacing="-1"
+                                        LineBreakMode="TailTruncation"
+                                        MaxLines="1"/>
+                                </VerticalStackLayout>
+
+                                <HorizontalStackLayout Grid.Column="2" Spacing="{StaticResource Sp6}" VerticalOptions="Center">
+
+                                    <Border
+                                        StrokeShape="RoundRectangle 9"
+                                        StrokeThickness="0"
+                                        BackgroundColor="{StaticResource TintCodeReview}"
+                                        Padding="{StaticResource PadPill}"
+                                        IsVisible="{Binding PersonTalking.HasCodeReviewCards}">
+                                        <Label Text="{Binding PersonTalking.CodeReviewBadge}" TextColor="{StaticResource ColorCodeReview}" FontSize="{DynamicResource FsXs}" FontAttributes="Bold" CharacterSpacing="0.5"/>
+                                    </Border>
+
+                                    <Border
+                                        StrokeShape="RoundRectangle 9"
+                                        StrokeThickness="0"
+                                        BackgroundColor="{StaticResource TintInProgress}"
+                                        Padding="{StaticResource PadPill}"
+                                        IsVisible="{Binding PersonTalking.HasInProgressCards}">
+                                        <Label Text="{Binding PersonTalking.InProgressBadge}" TextColor="{StaticResource ColorInProgress}" FontSize="{DynamicResource FsXs}" FontAttributes="Bold" CharacterSpacing="0.5"/>
+                                    </Border>
+
+                                    <Border
+                                        StrokeShape="RoundRectangle 9"
+                                        StrokeThickness="0"
+                                        BackgroundColor="{StaticResource TintDanger}"
+                                        Padding="{StaticResource PadPill}"
+                                        IsVisible="{Binding PersonTalking.HasFlaggedCards}">
+                                        <Label Text="{Binding PersonTalking.FlaggedBadge}" TextColor="{StaticResource ColorDangerLight}" FontSize="{DynamicResource FsXs}" FontAttributes="Bold" CharacterSpacing="0.5"/>
+                                    </Border>
+
+                                    <!-- Recarrega os cards apenas desta pessoa -->
+                                    <Border
+                                        HeightRequest="36"
+                                        WidthRequest="36"
+                                        StrokeShape="RoundRectangle 12"
+                                        Stroke="{StaticResource StrokeMid}"
+                                        StrokeThickness="1"
+                                        BackgroundColor="{StaticResource BgSubtle}"
+                                        Margin="6,0,0,0"
+                                        VerticalOptions="Center">
+
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding RefreshSpeakerCommand}"/>
+                                        </Border.GestureRecognizers>
+
+                                        <Grid>
+                                            <Label
+                                                FontFamily="MaterialDesignIcons"
+                                                Text="{x:Static material:MaterialIcon.Refresh}"
+                                                TextColor="{StaticResource BrandLight}"
+                                                FontSize="{DynamicResource FsBody}"
+                                                HorizontalOptions="Center"
+                                                VerticalOptions="Center"
+                                                IsVisible="{Binding IsRefreshingSpeaker, Converter={toolkit:InvertedBoolConverter}}"/>
+
+                                            <ActivityIndicator
+                                                IsRunning="{Binding IsRefreshingSpeaker}"
+                                                IsVisible="{Binding IsRefreshingSpeaker}"
+                                                Color="{StaticResource BrandLight}"
+                                                HeightRequest="18"
+                                                WidthRequest="18"
+                                                HorizontalOptions="Center"
+                                                VerticalOptions="Center"/>
+                                        </Grid>
+
+                                    </Border>
+
+                                </HorizontalStackLayout>
+
+                            </Grid>
+
+                        </Border>
+
+                        <!-- Gráficos -->
+                        <Grid
+                            Grid.Row="1"
+                            IsVisible="{Binding HasPersonTalking}"
+                            ColumnDefinitions="Auto, *"
+                            ColumnSpacing="{StaticResource Sp12}">
+
+                            <!-- Donut: distribuição do board -->
+                            <Border
+                                Grid.Column="0"
+                                StrokeShape="RoundRectangle 18"
+                                Stroke="{StaticResource StrokeSubtle}"
+                                StrokeThickness="1"
+                                BackgroundColor="{StaticResource BgCard}"
+                                Padding="18,16">
+                                <VerticalStackLayout Spacing="{StaticResource Sp12}">
+
+                                    <Label Text="Distribuição do board" TextColor="{StaticResource TextSecondary}" FontSize="{DynamicResource FsMd}"/>
+
+                                    <HorizontalStackLayout Spacing="{StaticResource Sp16}">
+
+                                        <GraphicsView
+                                            Drawable="{Binding StatusDonut}"
+                                            HeightRequest="104"
+                                            WidthRequest="104"
+                                            VerticalOptions="Center"/>
+
+                                        <VerticalStackLayout Spacing="{StaticResource Sp8}" VerticalOptions="Center">
+
+                                            <HorizontalStackLayout Spacing="{StaticResource Sp8}">
+                                                <Ellipse WidthRequest="8" HeightRequest="8" Fill="{StaticResource ColorCodeReview}" VerticalOptions="Center"/>
+                                                <Label Text="Code review" TextColor="{StaticResource TextSecondary}" FontSize="{DynamicResource FsXs}" VerticalOptions="Center"/>
+                                                <Label Text="{Binding CodeReviewCount}" TextColor="{StaticResource TextMuted}" FontSize="{DynamicResource FsXs}" FontAttributes="Bold" VerticalOptions="Center"/>
+                                            </HorizontalStackLayout>
+
+                                            <HorizontalStackLayout Spacing="{StaticResource Sp8}">
+                                                <Ellipse WidthRequest="8" HeightRequest="8" Fill="{StaticResource ColorInProgress}" VerticalOptions="Center"/>
+                                                <Label Text="In progress" TextColor="{StaticResource TextSecondary}" FontSize="{DynamicResource FsXs}" VerticalOptions="Center"/>
+                                                <Label Text="{Binding InProgressCount}" TextColor="{StaticResource TextMuted}" FontSize="{DynamicResource FsXs}" FontAttributes="Bold" VerticalOptions="Center"/>
+                                            </HorizontalStackLayout>
+
+                                            <HorizontalStackLayout Spacing="{StaticResource Sp8}">
+                                                <Ellipse WidthRequest="8" HeightRequest="8" Fill="{StaticResource StrokeStrong}" VerticalOptions="Center"/>
+                                                <Label Text="Outros" TextColor="{StaticResource TextSecondary}" FontSize="{DynamicResource FsXs}" VerticalOptions="Center"/>
+                                                <Label Text="{Binding TodoCount}" TextColor="{StaticResource TextMuted}" FontSize="{DynamicResource FsXs}" FontAttributes="Bold" VerticalOptions="Center"/>
+                                            </HorizontalStackLayout>
+
+                                        </VerticalStackLayout>
+
+                                    </HorizontalStackLayout>
+
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <!-- Barras: carga por pessoa -->
+                            <Border
+                                Grid.Column="1"
+                                StrokeShape="RoundRectangle 18"
+                                Stroke="{StaticResource StrokeSubtle}"
+                                StrokeThickness="1"
+                                BackgroundColor="{StaticResource BgCard}"
+                                Padding="18,16">
+                                <VerticalStackLayout Spacing="{StaticResource Sp12}">
+                                    <Label Text="Carga por pessoa" TextColor="{StaticResource TextSecondary}" FontSize="{DynamicResource FsMd}"/>
+                                    <GraphicsView
+                                        Drawable="{Binding WorkloadBars}"
+                                        HeightRequest="104"
+                                        VerticalOptions="Center"/>
+                                </VerticalStackLayout>
+                            </Border>
+
+                        </Grid>
+
+                        <!-- Quadro do speaker: colunas por status, como no board do Jira -->
+                        <Border
+                            Grid.Row="2"
+                            IsVisible="{Binding HasPersonTalking}"
+                            StrokeShape="RoundRectangle 18"
+                            Stroke="{StaticResource StrokeSubtle}"
+                            StrokeThickness="1"
+                            BackgroundColor="{StaticResource BgCard}"
+                            Padding="16,14">
+
+                            <Grid RowDefinitions="Auto, *" RowSpacing="{StaticResource Sp12}">
+
+                                <Label
+                                    Grid.Row="0"
+                                    Text="{Binding SpeakerCardsHeader}"
+                                    TextColor="{StaticResource TextSecondary}"
+                                    FontSize="{DynamicResource FsMd}"
+                                    VerticalOptions="Center"/>
+
+                                <ScrollView
+                                    Grid.Row="1"
+                                    Orientation="Horizontal"
+                                    HorizontalScrollBarVisibility="Default"
+                                    VerticalScrollBarVisibility="Never">
+
+                                    <HorizontalStackLayout
+                                        BindableLayout.ItemsSource="{Binding SpeakerColumns}"
+                                        Spacing="{StaticResource Sp10}">
+
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="kanban:KanbanColumnViewModel">
+
+                                                <Border
+                                                    WidthRequest="260"
+                                                    StrokeShape="RoundRectangle 14"
+                                                    StrokeThickness="0"
+                                                    BackgroundColor="{StaticResource BgCanvas}"
+                                                    Padding="10,10">
+
+                                                    <Grid RowDefinitions="Auto, *" RowSpacing="{StaticResource Sp10}">
+
+                                                        <!-- Cabeçalho da coluna -->
+                                                        <HorizontalStackLayout Grid.Row="0" Spacing="{StaticResource Sp8}" Margin="2,0">
+                                                            <Label
+                                                                FontFamily="MaterialDesignIcons"
+                                                                Text="{Binding Icon}"
+                                                                TextColor="{Binding Accent}"
+                                                                FontSize="{DynamicResource FsBody}"
+                                                                VerticalOptions="Center"/>
+                                                            <Label
+                                                                Text="{Binding Title}"
+                                                                TextColor="{Binding Accent}"
+                                                                FontSize="{DynamicResource FsXs}"
+                                                                FontAttributes="Bold"
+                                                                CharacterSpacing="1.5"
+                                                                VerticalOptions="Center"/>
+                                                            <Border
+                                                                StrokeShape="RoundRectangle 7"
+                                                                StrokeThickness="0"
+                                                                BackgroundColor="{Binding Tint}"
+                                                                Padding="7,2"
+                                                                VerticalOptions="Center">
+                                                                <Label
+                                                                    Text="{Binding Count}"
+                                                                    TextColor="{Binding Accent}"
+                                                                    FontSize="{DynamicResource FsXs}"
+                                                                    FontAttributes="Bold"/>
+                                                            </Border>
+                                                        </HorizontalStackLayout>
+
+                                                        <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never" Padding="0,0,0,10">
+                                                            <VerticalStackLayout
+                                                                BindableLayout.ItemsSource="{Binding Cards}"
+                                                                Spacing="{StaticResource Sp6}">
+                                                                <BindableLayout.ItemTemplate>
+                                                                    <DataTemplate x:DataType="issue:AtlassianIssueDTO">
+                                                                        <whoWillTalk:IssueCardView
+                                                                            TapCommand="{Binding BindingContext.OpenCardCommand, Source={x:Reference Page}}"/>
+                                                                    </DataTemplate>
+                                                                </BindableLayout.ItemTemplate>
+                                                            </VerticalStackLayout>
+                                                        </ScrollView>
+
+                                                    </Grid>
+
+                                                </Border>
+
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+
+                                    </HorizontalStackLayout>
+
+                                </ScrollView>
+
+                            </Grid>
+
+                        </Border>
+                    </Grid>
+
+                    <!-- ═══ COLUNA LATERAL ═══ -->
+                    <Grid Grid.Column="1" RowDefinitions="Auto, *" RowSpacing="{StaticResource Sp12}">
+
+                        <!-- Painel do próximo -->
+                        <Border
+                            Grid.Row="0"
+                            x:Name="NextPanel"
+                            IsVisible="{Binding HasNextPerson}"
+                            StrokeShape="RoundRectangle 18"
+                            Stroke="{StaticResource StrokeSelected}"
+                            StrokeThickness="1"
+                            Padding="18,16">
+
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Offset="0" Color="{StaticResource BgGradFrom}"/>
+                                    <GradientStop Offset="1" Color="{StaticResource BgCardNext}"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+
+                            <VerticalStackLayout Spacing="{StaticResource Sp16}">
+
+                                <Grid ColumnDefinitions="Auto, *" ColumnSpacing="{StaticResource Sp12}">
+
+                                    <Border
+                                        Grid.Column="0"
+                                        HeightRequest="{StaticResource AvatarSm}"
+                                        WidthRequest="{StaticResource AvatarSm}"
+                                        StrokeShape="RoundRectangle 23"
+                                        Stroke="{StaticResource StrokeSelected}"
+                                        StrokeThickness="2"
+                                        BackgroundColor="{StaticResource BgAvatar}"
+                                        VerticalOptions="Center">
+                                        <Image Source="{Binding NextPerson.Source}" Aspect="AspectFill" HeightRequest="46" WidthRequest="46"/>
+                                    </Border>
+
+                                    <VerticalStackLayout Grid.Column="1" Spacing="{StaticResource Sp2}" VerticalOptions="Center">
+                                        <Label
+                                            Text="PRÓXIMO"
+                                            TextColor="{StaticResource BrandLight}"
+                                            FontSize="{DynamicResource FsXs}"
+                                            FontAttributes="Bold"
+                                            CharacterSpacing="2.5"/>
+                                        <Label
+                                            Text="{Binding NextPerson.Name}"
+                                            TextColor="{StaticResource TextPrimary}"
+                                            FontSize="{DynamicResource FsXl}"
+                                            FontAttributes="Bold"
+                                            CharacterSpacing="-0.5"
+                                            LineBreakMode="TailTruncation"
+                                            MaxLines="1"/>
+                                    </VerticalStackLayout>
+
+                                </Grid>
+
+                                <VerticalStackLayout Spacing="{StaticResource Sp8}">
+
+                                    <Grid ColumnDefinitions="*, Auto">
+                                        <Label Grid.Column="0" Text="Cards na sprint" TextColor="{StaticResource TextSecondary}" FontSize="{DynamicResource FsMd}"/>
+                                        <Label Grid.Column="1" Text="{Binding NextPerson.CardCount}" TextColor="{StaticResource TextMuted}" FontSize="{DynamicResource FsMd}" FontAttributes="Bold"/>
+                                    </Grid>
+
+                                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource StrokeSubtle}"/>
+
+                                    <Grid ColumnDefinitions="*, Auto">
+                                        <Label Grid.Column="0" Text="Code review" TextColor="{StaticResource TextSecondary}" FontSize="{DynamicResource FsMd}"/>
+                                        <Label Grid.Column="1" Text="{Binding NextPerson.CodeReviewCount}" TextColor="{StaticResource ColorCodeReview}" FontSize="{DynamicResource FsMd}" FontAttributes="Bold"/>
+                                    </Grid>
+
+                                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource StrokeSubtle}"/>
+
+                                    <Grid ColumnDefinitions="*, Auto">
+                                        <Label Grid.Column="0" Text="In progress" TextColor="{StaticResource TextSecondary}" FontSize="{DynamicResource FsMd}"/>
+                                        <Label Grid.Column="1" Text="{Binding NextPerson.InProgressCount}" TextColor="{StaticResource ColorInProgress}" FontSize="{DynamicResource FsMd}" FontAttributes="Bold"/>
+                                    </Grid>
+
+                                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource StrokeSubtle}"/>
+
+                                    <Grid ColumnDefinitions="*, Auto">
+                                        <Label Grid.Column="0" Text="Com flag" TextColor="{StaticResource TextSecondary}" FontSize="{DynamicResource FsMd}"/>
+                                        <Label Grid.Column="1" Text="{Binding NextPerson.FlaggedCount}" TextColor="{StaticResource ColorDangerLight}" FontSize="{DynamicResource FsMd}" FontAttributes="Bold"/>
+                                    </Grid>
+
+                                </VerticalStackLayout>
+
+                            </VerticalStackLayout>
+
+                        </Border>
+
+                        <!-- Fila -->
+                        <Border
+                            Grid.Row="1"
+                            StrokeShape="RoundRectangle 18"
+                            Stroke="{StaticResource StrokeSubtle}"
+                            StrokeThickness="1"
+                            BackgroundColor="{StaticResource BgCard}"
+                            Padding="14,14"
+                            IsVisible="{Binding HasRemainingPersons}">
+
+                            <Grid RowDefinitions="Auto, *" RowSpacing="{StaticResource Sp10}">
+
+                                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="4,0">
+
+                                    <Label
+                                        Grid.Column="0"
+                                        Text="Na fila"
+                                        TextColor="{StaticResource TextSecondary}"
+                                        FontSize="{DynamicResource FsMd}"
+                                        VerticalOptions="Center"/>
+
+                                    <Border
+                                        Grid.Column="1"
+                                        StrokeShape="RoundRectangle 8"
+                                        StrokeThickness="0"
+                                        BackgroundColor="{StaticResource TintNeutral}"
+                                        Padding="8,3"
+                                        VerticalOptions="Center">
+                                        <Label
+                                            Text="{Binding RemainingPersons.Count}"
+                                            TextColor="{StaticResource TextMuted}"
+                                            FontSize="{DynamicResource FsXs}"
+                                            FontAttributes="Bold"/>
+                                    </Border>
+
+                                </Grid>
+
+                                <CollectionView
+                                    Grid.Row="1"
+                                    ItemsSource="{Binding RemainingPersons}"
+                                    VerticalScrollBarVisibility="Never">
+
+                                    <CollectionView.ItemsLayout>
+                                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="{StaticResource Sp4}"/>
+                                    </CollectionView.ItemsLayout>
+
+                                    <!--
+                                        O Border pai recorta no seu limite, mas a lista nativa
+                                        recebe altura maior que a área visível: sem este rodapé
+                                        o scroll termina antes e o último item fica cortado.
+                                    -->
+                                    <CollectionView.Footer>
+                                        <BoxView HeightRequest="14" Color="Transparent"/>
+                                    </CollectionView.Footer>
+
+                                    <CollectionView.ItemTemplate>
+                                            <DataTemplate x:DataType="whoWillTalk:PersonViewModel">
+
+                                                <Border
+                                                    StrokeShape="RoundRectangle 14"
+                                                    StrokeThickness="0"
+                                                    BackgroundColor="{StaticResource BgCardNext}"
+                                                    Padding="10,8"
+                                                    Opacity="{Binding Opacity}">
+
+                                                    <Border.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding BindingContext.RemoveCommand, Source={x:Reference Page}}"
+                                                            CommandParameter="{Binding}"
+                                                            NumberOfTapsRequired="2"/>
+                                                    </Border.GestureRecognizers>
+
+                                                    <Grid ColumnDefinitions="18, Auto, *, Auto" ColumnSpacing="{StaticResource Sp10}">
+
+                                                        <Label
+                                                            Grid.Column="0"
+                                                            Text="{Binding PositionLabel}"
+                                                            TextColor="{StaticResource TextSecondary}"
+                                                            FontSize="{DynamicResource FsXs}"
+                                                            FontAttributes="Bold"
+                                                            HorizontalTextAlignment="Center"
+                                                            VerticalOptions="Center"/>
+
+                                                        <Border
+                                                            Grid.Column="1"
+                                                            HeightRequest="36"
+                                                            WidthRequest="36"
+                                                            StrokeShape="RoundRectangle 18"
+                                                            Stroke="{StaticResource StrokeStrong}"
+                                                            StrokeThickness="1"
+                                                            BackgroundColor="{StaticResource BgAvatar}"
+                                                            VerticalOptions="Center">
+                                                            <Image Source="{Binding Source}" Aspect="AspectFill" HeightRequest="36" WidthRequest="36"/>
+                                                        </Border>
+
+                                                        <VerticalStackLayout Grid.Column="2" Spacing="0" VerticalOptions="Center">
+                                                            <Label
+                                                                Text="{Binding Name}"
+                                                                TextColor="{StaticResource TextPrimary}"
+                                                                FontSize="{DynamicResource FsBase}"
+                                                                FontAttributes="Bold"
+                                                                LineBreakMode="TailTruncation"
+                                                                MaxLines="1"/>
+                                                            <Label
+                                                                Text="{Binding CardSummary}"
+                                                                TextColor="{StaticResource TextSecondary}"
+                                                                FontSize="{DynamicResource FsXs}"
+                                                                IsVisible="{Binding HasCards}"/>
+                                                        </VerticalStackLayout>
+
+                                                        <HorizontalStackLayout
+                                                            Grid.Column="3"
+                                                            Spacing="{StaticResource Sp4}"
+                                                            VerticalOptions="Center"
+                                                            IsVisible="{Binding HasCards}">
+
+                                                            <Border
+                                                                StrokeShape="RoundRectangle 8"
+                                                                StrokeThickness="0"
+                                                                BackgroundColor="{StaticResource TintDanger}"
+                                                                Padding="7,3"
+                                                                IsVisible="{Binding HasFlaggedCards}">
+                                                                <Label Text="{Binding FlaggedCount}" TextColor="{StaticResource ColorDangerLight}" FontSize="{DynamicResource FsXs}" FontAttributes="Bold"/>
+                                                            </Border>
+
+                                                            <Border
+                                                                StrokeShape="RoundRectangle 8"
+                                                                StrokeThickness="0"
+                                                                BackgroundColor="{StaticResource TintCodeReview}"
+                                                                Padding="7,3"
+                                                                IsVisible="{Binding HasCodeReviewCards}">
+                                                                <Label Text="{Binding CodeReviewCount}" TextColor="{StaticResource ColorCodeReview}" FontSize="{DynamicResource FsXs}" FontAttributes="Bold"/>
+                                                            </Border>
+
+                                                            <Border
+                                                                StrokeShape="RoundRectangle 8"
+                                                                StrokeThickness="0"
+                                                                BackgroundColor="{StaticResource TintInProgress}"
+                                                                Padding="7,3"
+                                                                IsVisible="{Binding HasInProgressCards}">
+                                                                <Label Text="{Binding InProgressCount}" TextColor="{StaticResource ColorInProgress}" FontSize="{DynamicResource FsXs}" FontAttributes="Bold"/>
+                                                            </Border>
+
+                                                        </HorizontalStackLayout>
+
+                                                    </Grid>
+
+                                                </Border>
+
+                                            </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+
+                                </CollectionView>
+
+                            </Grid>
+
+                        </Border>
+
+                    </Grid>
+
+                </Grid>
+
+            </Grid>
+
+        </Grid>
+
+        <!-- ═══════════ ACTION BAR ═══════════ -->
+        <Grid
+            Grid.Row="3"
+            IsVisible="{Binding CanDisplayOptions}"
+            ColumnDefinitions="Auto, *, Auto, Auto"
+            ColumnSpacing="{StaticResource Sp12}"
+            Padding="{StaticResource PadActionBar}"
+            BackgroundColor="{StaticResource BgCanvas}">
+
+            <!-- Voltar para quem já falou -->
+            <Button
+                Grid.Column="0"
+                Text="←"
+                Command="{Binding PreviousCommand}"
+                IsEnabled="{Binding CanGoBack}"
+                BackgroundColor="{StaticResource BgSubtle}"
+                BorderColor="{StaticResource StrokeStrong}"
+                BorderWidth="1"
+                TextColor="{StaticResource TextPrimary}"
+                CornerRadius="30"
+                WidthRequest="{StaticResource ResetBtn}"
+                HeightRequest="{StaticResource ActionBtn}"
+                FontSize="{DynamicResource Fs3xl}"
+                FontAttributes="Bold"
+                ToolTipProperties.Text="Voltar para quem já falou (⌘B)">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding CanGoBack}" Value="False">
+                        <Setter Property="Opacity" Value="0.35"/>
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+
+            <Border
+                Grid.Column="1"
+                StrokeShape="RoundRectangle 30"
+                StrokeThickness="0"
+                HeightRequest="{StaticResource ActionBtn}">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Offset="0" Color="{StaticResource BrandLight}"/>
+                        <GradientStop Offset="1" Color="{StaticResource BrandDeep}"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Button
+                    Text="{Binding NextButtonText}"
+                    Command="{Binding NextCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource BgBase}"
+                    BorderWidth="0"
+                    FontAttributes="Bold"
+                    FontSize="{DynamicResource FsXl}"
+                    CharacterSpacing="0.5"
+                    ToolTipProperties.Text="Próximo (⌘N)"/>
+            </Border>
+
+            <Button
+                Grid.Column="2"
+                Text="Pular"
+                Command="{Binding SkipCommand}"
+                BackgroundColor="{StaticResource BgSubtle}"
+                BorderColor="{StaticResource StrokeStrong}"
+                BorderWidth="1"
+                TextColor="{StaticResource TextPrimary}"
+                CornerRadius="30"
+                WidthRequest="{StaticResource SkipBtn}"
+                HeightRequest="{StaticResource ActionBtn}"
+                FontSize="{DynamicResource FsBody}"
+                FontAttributes="Bold"
+                ToolTipProperties.Text="Manda para o fim da fila (⌘K)"/>
+
+            <Button
+                Grid.Column="3"
+                Text="↻"
+                Command="{Binding ResetCommand}"
+                BackgroundColor="{StaticResource BgSubtle}"
+                BorderColor="{StaticResource StrokeStrong}"
+                BorderWidth="1"
+                TextColor="{StaticResource TextPrimary}"
+                CornerRadius="30"
+                WidthRequest="{StaticResource ResetBtn}"
+                HeightRequest="{StaticResource ActionBtn}"
+                FontSize="{DynamicResource Fs3xl}"
+                FontAttributes="Bold"
+                ToolTipProperties.Text="Nova rodada (⇧⌘R)"/>
+
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

@@ -1,0 +1,12 @@
+# Build
+build/
+DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# App compilado do projeto MAUI anterior (96 MB, só serviu para recuperar o código)
+_backup_DailyDriver.app/
+
+# macOS
+.DS_Store

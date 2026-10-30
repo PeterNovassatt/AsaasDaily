@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- ══════════════════════════════════════════════════════
+         MAUI defaults (mantidos para compatibilidade)
+    ══════════════════════════════════════════════════════ -->
+    <Color x:Key="Primary">#1273D4</Color>
+    <Color x:Key="Secondary">#D6E8FA</Color>
+    <Color x:Key="Tertiary">#0A3B8C</Color>
+    <Color x:Key="White">White</Color>
+    <Color x:Key="Black">Black</Color>
+    <Color x:Key="Gray100">#E1E1E1</Color>
+    <Color x:Key="Gray200">#C8C8C8</Color>
+    <Color x:Key="Gray300">#ACACAC</Color>
+    <Color x:Key="Gray400">#919191</Color>
+    <Color x:Key="Gray500">#6E6E6E</Color>
+    <Color x:Key="Gray600">#404040</Color>
+    <Color x:Key="Gray900">#212121</Color>
+    <Color x:Key="Gray950">#141414</Color>
+    <SolidColorBrush x:Key="PrimaryBrush"   Color="{StaticResource Primary}"/>
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
+    <SolidColorBrush x:Key="TertiaryBrush"  Color="{StaticResource Tertiary}"/>
+    <SolidColorBrush x:Key="WhiteBrush"     Color="{StaticResource White}"/>
+    <SolidColorBrush x:Key="BlackBrush"     Color="{StaticResource Black}"/>
+    <SolidColorBrush x:Key="Gray100Brush"   Color="{StaticResource Gray100}"/>
+    <SolidColorBrush x:Key="Gray200Brush"   Color="{StaticResource Gray200}"/>
+    <SolidColorBrush x:Key="Gray300Brush"   Color="{StaticResource Gray300}"/>
+    <SolidColorBrush x:Key="Gray400Brush"   Color="{StaticResource Gray400}"/>
+    <SolidColorBrush x:Key="Gray500Brush"   Color="{StaticResource Gray500}"/>
+    <SolidColorBrush x:Key="Gray600Brush"   Color="{StaticResource Gray600}"/>
+    <SolidColorBrush x:Key="Gray900Brush"   Color="{StaticResource Gray900}"/>
+    <SolidColorBrush x:Key="Gray950Brush"   Color="{StaticResource Gray950}"/>
+    <Color x:Key="Yellow100Accent">#F7B548</Color>
+    <Color x:Key="Yellow200Accent">#FFD590</Color>
+    <Color x:Key="Yellow300Accent">#FFE5B9</Color>
+    <Color x:Key="Cyan100Accent">#28C2D1</Color>
+    <Color x:Key="Cyan200Accent">#7BDDEF</Color>
+    <Color x:Key="Cyan300Accent">#C3F2F4</Color>
+    <Color x:Key="Blue100Accent">#3E8EED</Color>
+    <Color x:Key="Blue200Accent">#72ACF1</Color>
+    <Color x:Key="Blue300Accent">#A7CBF6</Color>
+
+    <!-- ══════════════════════════════════════════════════════
+         DailyDriver — Tokens de cor (Backgrounds)
+         BgCanvas   → camada mais escura (página)
+         BgBase     → superfície base
+         BgSurface  → card padrão
+         BgCard     → card de lista
+         BgCardNext → destaque "próximo"
+         BgSubtle   → inputs / divisores
+         BgAvatar   → círculo de avatar
+         BgSelected → seleção de projeto/chip
+         BgGradFrom → início do gradiente hero
+    ══════════════════════════════════════════════════════ -->
+    <Color x:Key="BgCanvas">#050810</Color>
+    <Color x:Key="BgBase">#080D18</Color>
+    <Color x:Key="BgSurface">#0B111E</Color>
+    <Color x:Key="BgCard">#0D1422</Color>
+    <Color x:Key="BgCardNext">#101B2E</Color>
+    <Color x:Key="BgSubtle">#121B2A</Color>
+    <Color x:Key="BgAvatar">#1A2537</Color>
+    <Color x:Key="BgGradFrom">#0E2A55</Color>
+    <Color x:Key="BgSelected">#164079</Color>
+
+    <!-- ══════════════════════════════════════════════════════
+         DailyDriver — Tokens de cor (Bordas / Strokes)
+    ══════════════════════════════════════════════════════ -->
+    <Color x:Key="StrokeSubtle">#16202F</Color>
+    <Color x:Key="StrokeMid">#1F2C40</Color>
+    <Color x:Key="StrokeStrong">#27374F</Color>
+    <Color x:Key="StrokeAccent">#1B3A66</Color>
+    <Color x:Key="StrokeSelected">#2E86E0</Color>
+
+    <!-- ══════════════════════════════════════════════════════
+         DailyDriver — Tokens de cor (Texto)
+    ══════════════════════════════════════════════════════ -->
+    <Color x:Key="TextPrimary">#F7FAFD</Color>
+    <Color x:Key="TextSecondary">#8A9CB6</Color>
+    <Color x:Key="TextMuted">#DCE5F0</Color>
+
+    <!-- ══════════════════════════════════════════════════════
+         DailyDriver — Tokens de cor (Marca / Acento)
+         Paleta DailyDriver: azul vibrante → azul profundo, com
+         creme como acento quente pontual.
+         BrandPrimary → botões, spinner, seleção
+         BrandLight   → progress bar, destaques, texto de acento
+         BrandDeep    → fim dos gradientes
+    ══════════════════════════════════════════════════════ -->
+    <Color x:Key="BrandPrimary">#1273D4</Color>
+    <Color x:Key="BrandLight">#5AA9F0</Color>
+    <Color x:Key="BrandDeep">#0A3B8C</Color>
+
+    <!-- ══════════════════════════════════════════════════════
+         DailyDriver — Tokens de cor (Semântica)
+    ══════════════════════════════════════════════════════ -->
+    <Color x:Key="ColorCodeReview">#FCD34D</Color>
+    <Color x:Key="ColorInProgress">#34D399</Color>
+    <Color x:Key="ColorSuccess">#10B981</Color>
+    <Color x:Key="ColorDanger">#EF4444</Color>
+    <Color x:Key="ColorDangerLight">#F87171</Color>
+
+    <!-- ══════════════════════════════════════════════════════
+         DailyDriver — Tints (fundos de pill/badge, ~10-15% alpha)
+    ══════════════════════════════════════════════════════ -->
+    <Color x:Key="TintCodeReview">#26FCD34D</Color>
+    <Color x:Key="TintInProgress">#2634D399</Color>
+    <Color x:Key="TintBrand">#335AA9F0</Color>
+    <Color x:Key="TintDanger">#26F87171</Color>
+    <Color x:Key="TintNeutral">#1AFAFAFC</Color>
+
+    <!-- ══════════════════════════════════════════════════════
+         DailyDriver — Tokens de Espaçamento (x:Double)
+         Uso: Spacing="{StaticResource Sp12}"
+              Margin="{StaticResource Sp24}"
+    ══════════════════════════════════════════════════════ -->
+    <x:Double x:Key="Sp2">2</x:Double>
+    <x:Double x:Key="Sp4">4</x:Double>
+    <x:Double x:Key="Sp6">6</x:Double>
+    <x:Double x:Key="Sp8">8</x:Double>
+    <x:Double x:Key="Sp10">10</x:Double>
+    <x:Double x:Key="Sp12">12</x:Double>
+    <x:Double x:Key="Sp14">14</x:Double>
+    <x:Double x:Key="Sp16">16</x:Double>
+    <x:Double x:Key="Sp20">20</x:Double>
+    <x:Double x:Key="Sp24">24</x:Double>
+    <x:Double x:Key="Sp28">28</x:Double>
+    <x:Double x:Key="Sp32">32</x:Double>
+    <x:Double x:Key="Sp36">36</x:Double>
+    <x:Double x:Key="Sp40">40</x:Double>
+    <x:Double x:Key="Sp48">48</x:Double>
+    <x:Double x:Key="Sp56">56</x:Double>
+
+    <!-- ══════════════════════════════════════════════════════
+         DailyDriver — Tokens de Padding (Thickness)
+         Uso: Padding="{StaticResource PadCard}"
+    ══════════════════════════════════════════════════════ -->
+    <Thickness x:Key="PadCard">20,16,18,16</Thickness>
+    <Thickness x:Key="PadSection">24,16,24,16</Thickness>
+    <Thickness x:Key="PadPage">32,0</Thickness>
+    <Thickness x:Key="PadHero">40,36</Thickness>
+    <Thickness x:Key="PadChip">14,7</Thickness>
+    <Thickness x:Key="PadPill">10,4</Thickness>
+    <Thickness x:Key="PadStatCard">20,18</Thickness>
+    <Thickness x:Key="PadQueueItem">14,12</Thickness>
+    <Thickness x:Key="PadActionBar">32,18,32,24</Thickness>
+
+    <!-- ══════════════════════════════════════════════════════
+         DailyDriver — Tokens de Font Size (x:Double)
+         Uso: FontSize="{StaticResource FsSm}"
+    ══════════════════════════════════════════════════════ -->
+    <x:Double x:Key="FsXs">12</x:Double>
+    <x:Double x:Key="FsSm">13</x:Double>
+    <x:Double x:Key="FsMd">14</x:Double>
+    <x:Double x:Key="FsTag">15</x:Double>
+    <x:Double x:Key="FsBase">16</x:Double>
+    <x:Double x:Key="FsBody">17</x:Double>
+    <x:Double x:Key="FsLg">19</x:Double>
+    <x:Double x:Key="FsXl">21</x:Double>
+    <x:Double x:Key="Fs2xl">24</x:Double>
+    <x:Double x:Key="FsIcon">24</x:Double>
+    <x:Double x:Key="Fs3xl">28</x:Double>
+    <x:Double x:Key="FsDisplay">34</x:Double>
+    <x:Double x:Key="Fs4xl">40</x:Double>
+    <x:Double x:Key="FsStat">52</x:Double>
+    <x:Double x:Key="Fs5xl">46</x:Double>
+    <x:Double x:Key="Fs6xl">64</x:Double>
+    <x:Double x:Key="FsJumbo">68</x:Double>
+    <x:Double x:Key="FsGiant">84</x:Double>
+
+    <!-- ══════════════════════════════════════════════════════
+         DailyDriver — Tokens de Border Radius (x:Double)
+         Para StrokeShape="RoundRectangle {StaticResource RadMd}"
+         usa-se inline; para CornerRadius usa diretamente.
+    ══════════════════════════════════════════════════════ -->
+    <x:Double x:Key="RadSm">10</x:Double>
+    <x:Double x:Key="RadMd">12</x:Double>
+    <x:Double x:Key="RadLg">14</x:Double>
+    <x:Double x:Key="RadXl">16</x:Double>
+    <x:Double x:Key="Rad2xl">20</x:Double>
+    <x:Double x:Key="Rad3xl">24</x:Double>
+    <x:Double x:Key="RadPill">28</x:Double>
+    <x:Double x:Key="RadCircle">60</x:Double>
+
+    <!-- ══════════════════════════════════════════════════════
+         DailyDriver — Tokens de tamanho fixo (x:Double)
+    ══════════════════════════════════════════════════════ -->
+    <x:Double x:Key="AvatarSm">46</x:Double>
+    <x:Double x:Key="AvatarMd">64</x:Double>
+    <x:Double x:Key="AvatarLg">132</x:Double>
+    <x:Double x:Key="IconBtn">44</x:Double>
+    <x:Double x:Key="SpeechBtn">44</x:Double>
+    <x:Double x:Key="ActionBtn">64</x:Double>
+    <x:Double x:Key="SkipBtn">124</x:Double>
+    <x:Double x:Key="ResetBtn">64</x:Double>
+
+</ResourceDictionary>

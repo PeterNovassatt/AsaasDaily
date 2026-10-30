@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>DailyDriver</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-maccatalyst26.5</TargetFramework>
+    <PlatformTarget>Arm64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>14.0</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace />
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="DailyDriver.App.xaml" />
+    <None Remove="DailyDriver.Features.Configuration.ConfigurationAtlassianPersonView.xaml" />
+    <None Remove="DailyDriver.Features.Configuration.ConfigurationPage.xaml" />
+    <None Remove="DailyDriver.IssueCardView.xaml" />
+    <None Remove="DailyDriver.MainPage.xaml" />
+    <None Remove="DailyDriver.Platforms.Windows.App.xaml" />
+    <None Remove="DailyDriver.Resources.Styles.Colors.xaml" />
+    <None Remove="DailyDriver.Resources.Styles.Styles.xaml" />
+    <EmbeddedResource Include="DailyDriver.App.xaml" LogicalName="DailyDriver.App.xaml" />
+    <EmbeddedResource Include="DailyDriver.Features.Configuration.ConfigurationAtlassianPersonView.xaml" LogicalName="DailyDriver.Features.Configuration.ConfigurationAtlassianPersonView.xaml" />
+    <EmbeddedResource Include="DailyDriver.Features.Configuration.ConfigurationPage.xaml" LogicalName="DailyDriver.Features.Configuration.ConfigurationPage.xaml" />
+    <EmbeddedResource Include="DailyDriver.IssueCardView.xaml" LogicalName="DailyDriver.IssueCardView.xaml" />
+    <EmbeddedResource Include="DailyDriver.MainPage.xaml" LogicalName="DailyDriver.MainPage.xaml" />
+    <EmbeddedResource Include="DailyDriver.Platforms.Windows.App.xaml" LogicalName="DailyDriver.Platforms.Windows.App.xaml" />
+    <EmbeddedResource Include="DailyDriver.Resources.Styles.Colors.xaml" LogicalName="DailyDriver.Resources.Styles.Colors.xaml" />
+    <EmbeddedResource Include="DailyDriver.Resources.Styles.Styles.xaml" LogicalName="DailyDriver.Resources.Styles.Styles.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Maui.Controls" />
+    <Reference Include="Microsoft.Maui.Graphics" />
+    <Reference Include="Microsoft.Maui" />
+    <Reference Include="Microsoft.Maui.Controls.Xaml" />
+    <Reference Include="Microsoft.Maui.Essentials" />
+    <Reference Include="Microsoft.MacCatalyst" />
+    <Reference Include="Newtonsoft.Json" />
+    <Reference Include="CommunityToolkit.Maui" />
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+      <HintPath>../../../../../../../../usr/local/share/dotnet/shared/Microsoft.AspNetCore.App/10.0.8/Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Debug">
+      <HintPath>../../../../../../../../usr/local/share/dotnet/shared/Microsoft.AspNetCore.App/10.0.8/Microsoft.Extensions.Logging.Debug.dll</HintPath>
+    </Reference>
+    <Reference Include="CommunityToolkit.Maui.Core" />
+  </ItemGroup>
+</Project>

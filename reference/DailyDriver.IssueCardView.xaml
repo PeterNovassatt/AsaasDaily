@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+   xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+   xmlns:issue="clr-namespace:DailyDriver.Atlassian.Dtos.Issue"
+   x:Class="DailyDriver.IssueCardView"
+   x:DataType="issue:AtlassianIssueDTO"
+   x:Name="Root">
+
+    <Border
+        StrokeShape="RoundRectangle 12"
+        Stroke="{StaticResource StrokeSubtle}"
+        StrokeThickness="1"
+        BackgroundColor="{StaticResource BgSurface}"
+        Padding="12,10">
+
+        <Border.Triggers>
+            <!-- Épico: borda na cor da marca -->
+            <DataTrigger TargetType="Border" Binding="{Binding IsEpic}" Value="True">
+                <Setter Property="Stroke" Value="{StaticResource BrandPrimary}"/>
+            </DataTrigger>
+            <!-- Card que trouxe a pessoa para a rodada -->
+            <DataTrigger TargetType="Border" Binding="{Binding IsTriggerCard}" Value="True">
+                <Setter Property="Stroke" Value="{StaticResource ColorCodeReview}"/>
+            </DataTrigger>
+            <!-- Flag: vem por último, tem prioridade -->
+            <DataTrigger TargetType="Border" Binding="{Binding IsFlagged}" Value="True">
+                <Setter Property="Stroke" Value="{StaticResource ColorDangerLight}"/>
+            </DataTrigger>
+        </Border.Triggers>
+
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer
+                Command="{Binding TapCommand, Source={x:Reference Root}}"
+                CommandParameter="{Binding}"/>
+        </Border.GestureRecognizers>
+
+        <VerticalStackLayout Spacing="{StaticResource Sp8}">
+
+            <!-- Pai: subtask → story, story → épico -->
+            <Border
+                StrokeShape="RoundRectangle 6"
+                StrokeThickness="0"
+                BackgroundColor="{StaticResource TintBrand}"
+                Padding="7,3"
+                HorizontalOptions="Start"
+                IsVisible="{Binding HasParent}">
+                <Label
+                    Text="{Binding ParentLabel}"
+                    TextColor="{StaticResource BrandLight}"
+                    FontSize="{DynamicResource FsXs}"
+                    FontAttributes="Bold"
+                    LineBreakMode="TailTruncation"
+                    MaxLines="1"/>
+            </Border>
+
+            <!-- Título -->
+            <Label
+                Text="{Binding Summary}"
+                TextColor="{StaticResource TextPrimary}"
+                FontSize="{DynamicResource FsBase}"
+                FontAttributes="Bold"
+                LineBreakMode="TailTruncation"
+                MaxLines="3"
+                CharacterSpacing="-0.2"/>
+
+            <!-- Rodapé: key + tipo + flag -->
+            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="{StaticResource Sp8}">
+
+                <Label
+                    Grid.Column="0"
+                    Text="{Binding Key}"
+                    TextColor="{StaticResource TextSecondary}"
+                    FontSize="{DynamicResource FsXs}"
+                    FontAttributes="Bold"
+                    CharacterSpacing="0.5"
+                    VerticalOptions="Center"/>
+
+                <Label
+                    Grid.Column="1"
+                    Text="{Binding IssueType}"
+                    TextColor="{StaticResource TextSecondary}"
+                    FontSize="{DynamicResource FsXs}"
+                    LineBreakMode="TailTruncation"
+                    MaxLines="1"
+                    Opacity="0.7"
+                    VerticalOptions="Center"/>
+
+                <!--
+                    Flag (somente leitura): reserva espaço sempre.
+                    Não flagged → invisível. Flagged → vermelha + animação via code-behind.
+                -->
+                <Label
+                    x:Name="FlagIcon"
+                    Grid.Column="2"
+                    Text="⚑"
+                    FontSize="{DynamicResource FsBase}"
+                    VerticalOptions="Center"
+                    TextColor="{StaticResource ColorDangerLight}"
+                    Opacity="0">
+
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsFlagged}" Value="True">
+                            <Setter Property="Opacity" Value="1"/>
+                        </DataTrigger>
+                    </Label.Triggers>
+
+                </Label>
+
+            </Grid>
+
+        </VerticalStackLayout>
+
+    </Border>
+
+</ContentView>

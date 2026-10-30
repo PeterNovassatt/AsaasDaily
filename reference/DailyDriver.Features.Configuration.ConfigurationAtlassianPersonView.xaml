@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+   xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+   xmlns:configuration="clr-namespace:DailyDriver.Features.Configuration"
+   xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+   x:Class="DailyDriver.Features.Configuration.ConfigurationAtlassianPersonView"
+   x:DataType="configuration:ConfigurationAtlassianPersonViewModel">
+
+    <ContentView.GestureRecognizers>
+        <TapGestureRecognizer Command="{Binding TapCommand}"/>
+        <TapGestureRecognizer Command="{Binding EditCommand}" NumberOfTapsRequired="2"/>
+    </ContentView.GestureRecognizers>
+
+    <Border
+        StrokeShape="RoundRectangle 14"
+        StrokeThickness="1"
+        Stroke="Transparent"
+        BackgroundColor="Transparent"
+        Padding="10,8"
+        Margin="0,0,0,4">
+
+        <Border.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding Checked}" Value="True">
+                <Setter Property="BackgroundColor" Value="{StaticResource BgCardNext}"/>
+                <Setter Property="Stroke" Value="{StaticResource StrokeMid}"/>
+            </DataTrigger>
+        </Border.Triggers>
+
+        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="{StaticResource Sp12}">
+
+            <!-- Avatar -->
+            <Border
+                Grid.Column="0"
+                HeightRequest="40"
+                WidthRequest="40"
+                StrokeShape="RoundRectangle 20"
+                StrokeThickness="1"
+                Stroke="{StaticResource StrokeStrong}"
+                BackgroundColor="{StaticResource BgAvatar}"
+                VerticalOptions="Center">
+                <Image Source="{Binding AvatarUrl}" Aspect="AspectFill" HeightRequest="40" WidthRequest="40"/>
+            </Border>
+
+            <!-- Nome + apelido -->
+            <VerticalStackLayout
+                Grid.Column="1"
+                VerticalOptions="Center"
+                Spacing="{StaticResource Sp2}">
+
+                <Label
+                    Text="{Binding Name}"
+                    TextColor="{StaticResource TextPrimary}"
+                    FontSize="{StaticResource FsBase}"
+                    FontAttributes="Bold"
+                    LineBreakMode="TailTruncation"
+                    MaxLines="1"/>
+
+                <Label
+                    Text="{Binding Nickname, StringFormat='✎ {0}'}"
+                    IsVisible="{Binding Nickname, Converter={toolkit:IsNotNullConverter}}"
+                    TextColor="{StaticResource BrandLight}"
+                    FontSize="{StaticResource FsXs}"/>
+
+                <Label
+                    Text="toque 2× para apelido"
+                    IsVisible="{Binding Nickname, Converter={toolkit:IsNullConverter}}"
+                    TextColor="{StaticResource TextSecondary}"
+                    FontSize="{StaticResource FsXs}"/>
+
+            </VerticalStackLayout>
+
+            <!-- Checkbox -->
+            <Border
+                Grid.Column="2"
+                HeightRequest="24"
+                WidthRequest="24"
+                StrokeShape="RoundRectangle 8"
+                StrokeThickness="1"
+                Stroke="{StaticResource StrokeStrong}"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                BackgroundColor="Transparent">
+
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding Checked}" Value="True">
+                        <Setter Property="BackgroundColor" Value="{StaticResource BrandPrimary}"/>
+                        <Setter Property="Stroke" Value="{StaticResource BrandPrimary}"/>
+                    </DataTrigger>
+                </Border.Triggers>
+
+                <Label
+                    Text="✓"
+                    TextColor="{StaticResource TextPrimary}"
+                    FontSize="{StaticResource FsMd}"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    IsVisible="{Binding Checked}"/>
+
+            </Border>
+
+        </Grid>
+
+    </Border>
+
+</ContentView>
