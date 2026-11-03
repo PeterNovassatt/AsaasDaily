@@ -24,7 +24,7 @@ struct DailyView: View {
                 splitView.transition(.opacity)
             }
         }
-        .dynamicTypeSize(settings.textScale.dynamicTypeSize)
+        .environment(\.fontScale, settings.textScale.factor)
         .preferredColorScheme(settings.appearance.colorScheme)
         .modifier(FullScreenSync(isPresenting: Binding(
             get: { daily.isPresenting },

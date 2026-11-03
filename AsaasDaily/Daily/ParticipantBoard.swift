@@ -27,13 +27,13 @@ struct ParticipantBoard: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 7) {
                     Image(systemName: column.symbol)
-                        .font(.caption)
+                        .scaledFont(.caption)
                         .foregroundStyle(column.accent)
                     Text(column.status)
-                        .font(.caption.weight(.semibold))
+                        .scaledFont(.caption, weight: .semibold)
                         .foregroundStyle(column.accent)
                     Text("\(column.count)")
-                        .font(.caption2.weight(.bold))
+                        .scaledFont(.caption2, weight: .bold)
                         .monospacedDigit()
                         .foregroundStyle(column.accent)
                         .padding(.horizontal, 6)
@@ -86,32 +86,32 @@ struct IssueCard: View {
         VStack(alignment: .leading, spacing: 7) {
             if issue.hasParent {
                 Label(issue.parentLabel, systemImage: "arrow.turn.down.right")
-                    .font(.caption2)
+                    .scaledFont(.caption2)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
 
             Text(issue.summary)
-                .font(.callout)
+                .scaledFont(.callout)
                 .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             HStack(spacing: 6) {
                 Text(issue.key)
-                    .font(.caption2.monospaced())
+                    .scaledFont(.caption2, design: .monospaced)
                     .foregroundStyle(.secondary)
 
                 Spacer(minLength: 0)
 
                 if issue.isTriggerCard {
                     Image(systemName: "star.fill")
-                        .font(.caption2)
+                        .scaledFont(.caption2)
                         .foregroundStyle(Color.orange)
                 }
                 if issue.isFlagged {
                     Image(systemName: "flag.fill")
-                        .font(.caption2)
+                        .scaledFont(.caption2)
                         .foregroundStyle(Color.red)
                         .symbolEffect(.pulse, options: .repeating)
                 }

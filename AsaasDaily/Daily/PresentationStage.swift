@@ -37,13 +37,13 @@ struct PresentationStage: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text(participant.name)
-                        .font(.system(size: 64, weight: .bold))
+                        .scaledFont(size: 64, weight: .bold)
                         .matchedGeometryEffect(id: "name-\(participant.id)", in: namespace)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
 
                     Text(participant.cardSummary)
-                        .font(.title3)
+                        .scaledFont(.title3)
                         .foregroundStyle(.secondary)
                 }
 
@@ -93,7 +93,7 @@ struct PresentationStage: View {
     private var cards: some View {
         if highlights.isEmpty {
             Text("Sem cards em review ou em progresso")
-                .font(.title3)
+                .scaledFont(.title3)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
         } else {
@@ -106,7 +106,7 @@ struct PresentationStage: View {
 
                 if remaining > 0 || highlights.count > 6 {
                     Text("mais \(participant.cards.count - min(highlights.count, 6)) cards")
-                        .font(.callout)
+                        .scaledFont(.callout)
                         .foregroundStyle(.tertiary)
                         .frame(maxWidth: .infinity, minHeight: 72)
                         .background {
@@ -125,7 +125,7 @@ struct PresentationStage: View {
         Button(action: onExit) {
             Label("Sair da apresentação", systemImage: "xmark")
                 .labelStyle(.iconOnly)
-                .font(.title3)
+                .scaledFont(.title3)
                 .padding(10)
         }
         .buttonStyle(.plain)
@@ -153,11 +153,11 @@ struct PresentationStage: View {
         var body: some View {
             HStack(spacing: 6) {
                 Text(keys)
-                    .font(.caption.monospaced())
+                    .scaledFont(.caption, design: .monospaced)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
                     .background(.quaternary.opacity(0.4), in: .rect(cornerRadius: 5))
-                Text(action).font(.caption)
+                Text(action).scaledFont(.caption)
             }
         }
     }
@@ -171,10 +171,10 @@ struct PresentationStage: View {
             if count > 0 {
                 HStack(spacing: 7) {
                     Text("\(count)")
-                        .font(.title3.weight(.bold))
+                        .scaledFont(.title3, weight: .bold)
                         .monospacedDigit()
                         .contentTransition(.numericText())
-                    Text(label).font(.callout)
+                    Text(label).scaledFont(.callout)
                 }
                 .foregroundStyle(color)
                 .padding(.horizontal, 14)
@@ -196,12 +196,12 @@ private struct StageCard: View {
                 Image(systemName: StatusPalette.symbol(issue.status))
                     .foregroundStyle(StatusPalette.accent(issue.status))
                 Text(issue.status.uppercased())
-                    .font(.caption.weight(.semibold))
+                    .scaledFont(.caption, weight: .semibold)
                     .kerning(0.8)
                     .foregroundStyle(StatusPalette.accent(issue.status))
                 Spacer(minLength: 0)
                 Text(issue.key)
-                    .font(.caption.monospaced())
+                    .scaledFont(.caption, design: .monospaced)
                     .foregroundStyle(.secondary)
                 if issue.isFlagged {
                     Image(systemName: "flag.fill")
@@ -211,14 +211,14 @@ private struct StageCard: View {
             }
 
             Text(issue.summary)
-                .font(.title3.weight(.medium))
+                .scaledFont(.title3, weight: .medium)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             if issue.hasParent {
                 Label(issue.parentLabel, systemImage: "arrow.turn.down.right")
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.tertiary)
                     .lineLimit(1)
             }

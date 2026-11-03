@@ -44,6 +44,18 @@ os projetos que entram na daily e quem participa. O token fica no Keychain.
 Quem usava o app anterior em .NET MAUI tem a configuração importada automaticamente na
 primeira execução — credenciais, projetos e apelidos do time.
 
+## Assinatura
+
+O projeto aponta para um certificado Apple Development pelo hash, em
+`CODE_SIGN_IDENTITY`. Isso é o que mantém a identidade do app estável entre builds —
+com assinatura ad-hoc, o macOS trata cada build como um app diferente e o Keychain
+volta a pedir autorização para ler o token a cada abertura.
+
+O efeito colateral é que o projeto só compila na máquina que tem esse certificado.
+Quando outra pessoa for compilar, troque por assinatura automática
+(`CODE_SIGN_STYLE = Automatic` com o `DEVELOPMENT_TEAM` dela) ou pelo hash do
+certificado dela.
+
 ## Requisitos
 
 - macOS 15

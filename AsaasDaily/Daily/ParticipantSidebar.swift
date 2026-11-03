@@ -54,7 +54,7 @@ struct ParticipantSidebar: View {
 
                 if participant.hasTalked {
                     Image(systemName: "checkmark")
-                        .font(.caption2)
+                        .scaledFont(.caption2)
                         .foregroundStyle(.secondary)
                 } else {
                     Counter(value: participant.flaggedCards.count, color: Color.red)
@@ -75,7 +75,7 @@ struct ParticipantSidebar: View {
             var body: some View {
                 if value > 0 {
                     Text("\(value)")
-                        .font(.caption2.weight(.semibold))
+                        .scaledFont(.caption2, weight: .semibold)
                         .foregroundStyle(color)
                         .monospacedDigit()
                         .contentTransition(.numericText())

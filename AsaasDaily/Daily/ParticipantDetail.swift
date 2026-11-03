@@ -95,18 +95,18 @@ struct ParticipantDetail: View {
             VStack(alignment: .leading, spacing: 3) {
                 if isSpeaking {
                     Text("FALANDO AGORA")
-                        .font(.caption2.weight(.bold))
+                        .scaledFont(.caption2, weight: .bold)
                         .kerning(1.2)
                         .foregroundStyle(Color.accentColor)
                 }
 
                 Text(participant.name)
-                    .font(.system(size: 26, weight: .semibold))
+                    .scaledFont(size: 26, weight: .semibold)
                     .matchedGeometryEffect(id: "name-\(participant.id)", in: namespace)
                     .lineLimit(1)
 
                 Text(participant.cardSummary)
-                    .font(.callout)
+                    .scaledFont(.callout)
                     .foregroundStyle(.secondary)
             }
 
@@ -151,7 +151,7 @@ struct IssueRow: View {
 
                 if issue.hasParent {
                     Label(issue.parentLabel, systemImage: "arrow.turn.down.right")
-                        .font(.caption2)
+                        .scaledFont(.caption2)
                         .foregroundStyle(.tertiary)
                         .lineLimit(1)
                 }
@@ -160,7 +160,7 @@ struct IssueRow: View {
             Spacer(minLength: 8)
 
             Text(issue.key)
-                .font(.caption.monospaced())
+                .scaledFont(.caption, design: .monospaced)
                 .foregroundStyle(.secondary)
         }
         .padding(.vertical, 3)

@@ -50,11 +50,15 @@ struct ProgressRing: View {
         HStack(spacing: 7) {
             ring
             Text("\(spoken) de \(total)")
-                .font(.caption.weight(.medium))
+                .scaledFont(.caption, weight: .medium)
                 .monospacedDigit()
                 .contentTransition(.numericText())
                 .foregroundStyle(.secondary)
         }
+        // O fundo do item é desenhado em volta do conteúdo: sem esta folga o anel
+        // e o número encostam na borda da pílula.
+        .padding(.horizontal, 7)
+        .padding(.vertical, 2)
         .help("\(spoken) de \(total) já falaram")
     }
 

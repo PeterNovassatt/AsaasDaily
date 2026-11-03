@@ -35,7 +35,7 @@ private struct AccountSettings: View {
                             prompt: Text("Token gerado em id.atlassian.com"))
             } footer: {
                 Text("O token fica no Keychain, não nas preferências.")
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
             }
 
@@ -45,7 +45,7 @@ private struct AccountSettings: View {
                         .disabled(!settings.credentials.isComplete || isTesting)
                     if isTesting { ProgressView().controlSize(.small) }
                     if let status {
-                        Text(status).font(.callout).foregroundStyle(.secondary)
+                        Text(status).scaledFont(.callout).foregroundStyle(.secondary)
                     }
                 }
             }
@@ -87,9 +87,9 @@ private struct ProjectSettings: View {
                 ForEach(filtered) { project in
                     Toggle(isOn: binding(for: project)) {
                         VStack(alignment: .leading, spacing: 1) {
-                            Text(project.key).font(.body.weight(.medium))
+                            Text(project.key).scaledFont(.body, weight: .medium)
                             Text(project.name)
-                                .font(.caption)
+                                .scaledFont(.caption)
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
                         }
@@ -109,7 +109,7 @@ private struct ProjectSettings: View {
 
             HStack {
                 Text("\(settings.projectKeys.count) selecionados")
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
                 Button("Recarregar") { Task { await load() } }
@@ -161,7 +161,7 @@ private struct TeamSettings: View {
                                 set: { person.nickname = $0.isEmpty ? nil : $0 }
                             ))
                             .textFieldStyle(.plain)
-                            .font(.caption)
+                            .scaledFont(.caption)
                             .foregroundStyle(.secondary)
                         }
                     }
@@ -179,7 +179,7 @@ private struct TeamSettings: View {
 
             HStack {
                 Text("\(settings.selectedPeople.count) na daily")
-                    .font(.caption)
+                    .scaledFont(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
                 Button("Buscar do Jira") { Task { await load() } }

@@ -16,12 +16,13 @@ enum TextScale: Int, CaseIterable, Identifiable {
         }
     }
 
-    var dynamicTypeSize: DynamicTypeSize {
+    /// Multiplicador aplicado a cada fonte. O macOS não escala texto sozinho.
+    var factor: CGFloat {
         switch self {
-        case .padrao: .large
-        case .grande: .xLarge
-        case .maior: .xxLarge
-        case .maximo: .xxxLarge
+        case .padrao: 1.0
+        case .grande: 1.15
+        case .maior: 1.3
+        case .maximo: 1.5
         }
     }
 
