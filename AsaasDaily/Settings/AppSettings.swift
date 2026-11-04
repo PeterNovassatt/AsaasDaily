@@ -21,6 +21,16 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(appearance.rawValue, forKey: Self.appearanceKey) }
     }
 
+    /// Marcado quando a pessoa termina o setup inicial. Quem já usava o app entra
+    /// configurado e nunca vê a folha.
+    var setupCompleted: Bool {
+        didSet { UserDefaults.standard.set(setupCompleted, forKey: Self.setupKey) }
+    }
+
+    /// Uma folha de cada vez. Duas `.sheet` irmãs no mesmo view fazem o SwiftUI
+    /// reapresentar a segunda quando a primeira fecha — por isso um destino só.
+    var sheet: OnboardingSheet?
+
     private static let projectsKey = "jira.projectKeys"
     private static let peopleKey = "jira.people"
     private static let speechKey = "daily.speechEnabled"
@@ -28,12 +38,17 @@ final class AppSettings {
     private static let appearanceKey = "daily.appearance"
     private static let viewModeKey = "daily.cardsViewMode"
     private static let textScaleKey = "daily.textScale"
+    private static let setupKey = "daily.setupCompleted"
 
     var isConfigured: Bool {
         credentials.isComplete && !projectKeys.isEmpty && people.contains(where: \.isSelected)
     }
 
     var selectedPeople: [JiraPerson] { people.filter { $0.isActive && $0.isSelected } }
+
+    /// O setup aparece só para quem nunca configurou nada: quem já tem credencial e
+    /// time (inclusive vindo do app anterior) começa direto na daily.
+    var needsSetup: Bool { !setupCompleted && !isConfigured }
 
     init() {
         let defaults = UserDefaults.standard
@@ -43,12 +58,14 @@ final class AppSettings {
         textScale = TextScale(rawValue: defaults.integer(forKey: Self.textScaleKey)) ?? .padrao
         cardsViewMode = (defaults.string(forKey: Self.viewModeKey))
             .flatMap(CardsViewMode.init(rawValue:)) ?? .list
+        setupCompleted = defaults.bool(forKey: Self.setupKey)
         appearance = (defaults.string(forKey: Self.appearanceKey))
             .flatMap(AppAppearance.init(rawValue:)) ?? .dark
         people = (defaults.data(forKey: Self.peopleKey))
             .flatMap { try? JSONDecoder().decode([JiraPerson].self, from: $0) } ?? []
 
         if !defaults.bool(forKey: Self.importedKey) { importLegacyIfNeeded() }
+        if !setupCompleted && isConfigured { setupCompleted = true }
     }
 
     func save() {

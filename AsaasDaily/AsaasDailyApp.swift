@@ -92,5 +92,19 @@ struct DailyCommands: Commands {
                 .keyboardShortcut("0", modifiers: .command)
         }
 
+        // O guia continua disponível depois do primeiro uso: é onde o macOS
+        // manda procurar quando alguém não sabe o que um atalho faz.
+        CommandGroup(replacing: .help) {
+            Button("Guia do AsaasDaily") { settings.sheet = .guide }
+                .keyboardShortcut("?", modifiers: .command)
+
+            Button("Refazer configuração…") { settings.sheet = .setup }
+
+            Divider()
+
+            Button("Abrir o Jira") {
+                NSWorkspace.shared.open(settings.credentials.site)
+            }
+        }
     }
 }

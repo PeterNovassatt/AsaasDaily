@@ -35,14 +35,28 @@ pular, voltar e recarregar os cards de uma pessoa sem refazer a rodada.
 | `⇧⌘P` | modo apresentação |
 | `⌘+` `⌘−` `⌘0` | tamanho do texto |
 | `⌘,` | preferências |
+| `⌘?` | guia do app |
+
+## Primeira abertura
+
+Quem abre o app sem nada configurado cai numa folha de quatro passos que não dá para
+fechar antes do fim: conta do Jira (com link para gerar o API token), projetos, time e
+um guia de três telas sobre como a rodada funciona. O passo da conta só avança depois
+que o Jira aceita a credencial — errar ali deixaria as duas telas seguintes vazias sem
+dizer por quê.
+
+O guia continua acessível depois, em **Ajuda › Guia do AsaasDaily** (`⌘?`), e o setup
+inteiro pode ser refeito em **Ajuda › Refazer configuração…**.
 
 ## Configuração
 
 Em **Preferências** (`⌘,`): e-mail e API token do Jira (gerado em `id.atlassian.com`),
-os projetos que entram na daily e quem participa. O token fica no Keychain.
+os projetos que entram na daily e quem participa. São os mesmos controles do setup
+inicial. O token fica no Keychain.
 
 Quem usava o app anterior em .NET MAUI tem a configuração importada automaticamente na
-primeira execução — credenciais, projetos e apelidos do time.
+primeira execução — credenciais, projetos e apelidos do time. Nesse caso o setup não
+aparece: o app já tem tudo de que precisa.
 
 ## Assinatura
 
@@ -68,6 +82,7 @@ certificado dela.
 AsaasDaily/
 ├── Jira/        cliente da API: boards, issues, paginação, Keychain
 ├── Daily/       modelo da rodada e as telas
+├── Onboarding/  setup de primeira abertura e guia do app
 ├── Settings/    preferências e importação da configuração antiga
 └── Design/      aparência, escala de texto e cor por status
 reference/       código do app MAUI anterior, recuperado por decompilação

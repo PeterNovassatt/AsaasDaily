@@ -30,7 +30,22 @@ struct DailyView: View {
             get: { daily.isPresenting },
             set: { daily.isPresenting = $0 }
         )))
+        .sheet(item: $settings.sheet) { destination in
+            switch destination {
+            case .setup:
+                SetupView(settings: settings) { startsDaily in
+                    settings.sheet = nil
+                    Task {
+                        await reload()
+                        if startsDaily { advance() }
+                    }
+                }
+            case .guide:
+                GuideSheet()
+            }
+        }
         .task { await loadIfNeeded() }
+        .onAppear { if settings.needsSetup { settings.sheet = .setup } }
         .onChange(of: daily.speaker?.id) { _, new in
             withAnimation(.smooth) { selection = new }
         }
@@ -70,6 +85,9 @@ struct DailyView: View {
                 Label("Configure o acesso ao Jira", systemImage: "gearshape")
             } description: {
                 Text("E-mail, API token, projetos e participantes.")
+            } actions: {
+                Button("Configurar agora") { settings.sheet = .setup }
+                    .buttonStyle(.borderedProminent)
             }
         } else if let participant = shown {
             ParticipantDetail(participant: participant,
