@@ -45,6 +45,11 @@ um guia de três telas sobre como a rodada funciona. O passo da conta só avanç
 que o Jira aceita a credencial — errar ali deixaria as duas telas seguintes vazias sem
 dizer por quê.
 
+O passo do time explica a regra que costuma pegar o time de surpresa: a lista é montada
+a partir de quem está como **responsável por algum card em aberto nos projetos
+selecionados**. Quem não tem card atribuído não aparece — para incluir alguém é preciso
+adicionar o projeto onde essa pessoa tem cards, ou atribuir um card a ela no Jira.
+
 O guia continua acessível depois, em **Ajuda › Guia do AsaasDaily** (`⌘?`), e o setup
 inteiro pode ser refeito em **Ajuda › Refazer configuração…**.
 

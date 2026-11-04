@@ -127,7 +127,7 @@ struct TeamPicker: View {
                 if isLoading { ProgressView() }
                 else if settings.people.isEmpty {
                     ContentUnavailableView("Nenhum participante", systemImage: "person.3",
-                                           description: Text("Busque quem tem card em aberto nos projetos escolhidos."))
+                                           description: Text("A busca traz quem está como responsável por um card em aberto nos projetos selecionados. Se a lista vier vazia, nenhum card desses projetos tem responsável atribuído."))
                 }
             }
 

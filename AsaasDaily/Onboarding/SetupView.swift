@@ -131,7 +131,7 @@ struct SetupView: View {
     private var projectsStep: some View {
         VStack(alignment: .leading, spacing: 14) {
             header("Quais projetos entram na daily?",
-                   "Os cards vêm dos boards destes projetos. Dá para mudar depois em Preferências.",
+                   "Os cards vêm dos boards destes projetos — e é essa escolha que define quem aparece no passo seguinte. Dá para mudar depois em Preferências.",
                    symbol: "square.grid.2x2")
 
             ProjectPicker(settings: settings)
@@ -147,7 +147,7 @@ struct SetupView: View {
     private var teamStep: some View {
         VStack(alignment: .leading, spacing: 14) {
             header("Quem participa?",
-                   "Busquei quem tem card em aberto nos projetos escolhidos. Marque quem fala na daily — o apelido é o nome que aparece na tela.",
+                   "Marque quem fala na daily. O apelido é o nome que aparece na tela durante a rodada.",
                    symbol: "person.3")
 
             TeamPicker(settings: settings, loadsAutomatically: true)
@@ -155,6 +155,17 @@ struct SetupView: View {
                 .overlay {
                     RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(.quaternary)
                 }
+
+            // A regra fica visível depois que a lista carrega: é aqui que alguém
+            // percebe que está faltando gente e precisa saber por quê.
+            Label {
+                Text("A lista é quem está como responsável por algum card em aberto nos projetos do passo anterior. Quem não tem card atribuído não aparece — se faltar alguém, volte e inclua o projeto onde essa pessoa tem cards, ou peça para atribuírem um card a ela no Jira.")
+            } icon: {
+                Image(systemName: "info.circle")
+            }
+            .scaledFont(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
         }
     }
 
