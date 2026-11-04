@@ -12,6 +12,30 @@ enum JiraError: LocalizedError {
     }
 }
 
+/// Resultado de conferir uma credencial. Separar os casos é o que permite dizer o que
+/// fazer: um 401 é token errado, um 403 costuma ser o SSO do asaasdev sem autorizar.
+enum JiraCheck: Equatable {
+    case ok(name: String)
+    case unauthorized
+    case forbidden
+    case notFound
+    case offline
+    case server(Int)
+
+    var isOK: Bool { if case .ok = self { true } else { false } }
+
+    var message: String {
+        switch self {
+        case .ok(let name): "Conectado como \(name)"
+        case .unauthorized: "E-mail ou token não conferem. Gere um token novo e confira se o e-mail é o mesmo da conta do Jira."
+        case .forbidden: "A conta autenticou, mas o acesso foi negado. Normalmente é o SSO do asaasdev: autorize o token no Atlassian e tente de novo."
+        case .notFound: "O endereço do Jira não respondeu a essa chamada. Confira o site configurado."
+        case .offline: "Não consegui falar com o Jira. Confira a sua conexão ou a VPN."
+        case .server(let status): "O Jira respondeu \(status)."
+        }
+    }
+}
+
 /// Acesso à API do Jira. Duas lições do app anterior estão embutidas aqui:
 /// o id do campo "Flagged" é descoberto pelo nome (varia por instância) e as
 /// consultas de issue são paginadas — a API trunca em maxResults e um board
@@ -165,6 +189,26 @@ actor JiraClient {
 // MARK: - Dados para as preferências
 
 extension JiraClient {
+
+    /// Confere a credencial em uma chamada barata, que de quebra traz o nome da conta.
+    func verify() async -> JiraCheck {
+        do {
+            struct Me: Decodable { let displayName: String }
+            let data = try await get("/rest/api/3/myself")
+            let me = try JSONDecoder().decode(Me.self, from: data)
+            return .ok(name: me.displayName)
+        } catch let error as JiraError {
+            guard case .http(let status) = error else { return .unauthorized }
+            return switch status {
+            case 401: .unauthorized
+            case 403: .forbidden
+            case 404: .notFound
+            default: .server(status)
+            }
+        } catch {
+            return .offline
+        }
+    }
 
     /// Projetos a que a conta tem acesso, paginados.
     func projects() async -> [JiraProject] {

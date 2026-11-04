@@ -13,12 +13,18 @@ struct SetupView: View {
     }
 
     private enum CheckStatus: Equatable {
-        case idle, checking, connected(Int), failed
+        case idle, checking, done(JiraCheck)
     }
 
     @State private var step = Step.account
     @State private var status = CheckStatus.idle
     @State private var forward = true
+
+    /// Ligado quando a pessoa abre a página de criar o token: só a partir daí o setup
+    /// olha a área de transferência, e só para o que foi copiado depois disso.
+    @State private var watchesClipboard = false
+    @State private var clipboardMark = 0
+    @State private var didAutoPaste = false
 
     private static let tokenURL = URL(string: "https://id.atlassian.com/manage-profile/security/api-tokens")!
 
@@ -57,6 +63,17 @@ struct SetupView: View {
         .animation(.spring(duration: 0.4), value: step)
         .onChange(of: settings.credentials.email) { status = .idle }
         .onChange(of: settings.credentials.apiToken) { status = .idle }
+        // Enquanto a página do token está aberta, fica de olho na área de
+        // transferência. Depender de o app voltar ao foco não serve: com o navegador
+        // em outro monitor ou outra janela, essa volta pode nunca acontecer.
+        .task(id: watchesClipboard) {
+            guard watchesClipboard else { return }
+            let deadline = Date().addingTimeInterval(300)
+            while watchesClipboard, Date() < deadline, !Task.isCancelled {
+                pasteTokenIfAvailable()
+                try? await Task.sleep(for: .seconds(1))
+            }
+        }
     }
 
     private var transition: AnyTransition {
@@ -91,7 +108,13 @@ struct SetupView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("O token fica no Keychain do seu Mac, nunca nas preferências.")
                             .foregroundStyle(.secondary)
-                        Link("Criar um API token no Atlassian", destination: Self.tokenURL)
+                        Button("Criar um API token no Atlassian", action: openTokenPage)
+                            .buttonStyle(.link)
+                        if watchesClipboard {
+                            Label("Copie o token e volte para cá: eu colo e confiro sozinho.",
+                                  systemImage: "doc.on.clipboard")
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     .font(.callout)
                     .padding(.top, 2)
@@ -107,23 +130,51 @@ struct SetupView: View {
 
     @ViewBuilder
     private var statusLine: some View {
-        switch status {
-        case .idle:
-            EmptyView()
-        case .checking:
-            HStack(spacing: 8) {
-                ProgressView().controlSize(.small)
-                Text("Conferindo o acesso…").foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 6) {
+            if didAutoPaste {
+                Label("Colei o token da área de transferência.", systemImage: "doc.on.clipboard.fill")
+                    .foregroundStyle(.secondary)
             }
-        case .connected(let count):
-            Label("Conectado · \(count) projetos visíveis", systemImage: "checkmark.circle.fill")
-                .foregroundStyle(.green)
-        case .failed:
-            Label("Não consegui autenticar. Confira o e-mail e gere um token novo.",
-                  systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
-                .fixedSize(horizontal: false, vertical: true)
+            switch status {
+            case .idle:
+                EmptyView()
+            case .checking:
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.small)
+                    Text("Conferindo o acesso…").foregroundStyle(.secondary)
+                }
+            case .done(let check):
+                Label(check.message, systemImage: check.isOK ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                    .foregroundStyle(check.isOK ? .green : .orange)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
+        .scaledFont(.callout)
+    }
+
+    // MARK: - Token
+
+    private func openTokenPage() {
+        clipboardMark = NSPasteboard.general.changeCount
+        watchesClipboard = true
+        NSWorkspace.shared.open(Self.tokenURL)
+    }
+
+    /// Ao voltar do navegador: se foi copiado algo com cara de token depois que a
+    /// página abriu, preenche o campo e já confere, sem passar pelo botão.
+    private func pasteTokenIfAvailable() {
+        guard watchesClipboard, settings.credentials.apiToken.isEmpty, step == .account else { return }
+
+        let pasteboard = NSPasteboard.general
+        guard pasteboard.changeCount != clipboardMark,
+              let text = pasteboard.string(forType: .string),
+              let token = AtlassianToken.detect(in: text) else { return }
+
+        watchesClipboard = false
+        settings.credentials.apiToken = token
+        withAnimation(.smooth) { didAutoPaste = true }
+        guard settings.credentials.isComplete else { return }
+        Task { await check() }
     }
 
     // MARK: - Projetos
@@ -219,7 +270,7 @@ struct SetupView: View {
 
     private func advance() {
         switch step {
-        case .account: Task { await checkAndContinue() }
+        case .account: Task { if await check() { go(to: .projects) } }
         case .projects: go(to: .team)
         case .team: go(to: .guide)
         case .guide: finish(true)
@@ -228,17 +279,14 @@ struct SetupView: View {
 
     /// O passo da conta só avança com credencial que o Jira aceitou: errar aqui
     /// deixaria as duas telas seguintes vazias sem dizer por quê.
-    private func checkAndContinue() async {
+    @discardableResult
+    private func check() async -> Bool {
         settings.save()
         status = .checking
 
-        let found = await JiraClient(credentials: settings.credentials).projects()
-        guard !found.isEmpty else {
-            status = .failed
-            return
-        }
-        status = .connected(found.count)
-        go(to: .projects)
+        let result = await JiraClient(credentials: settings.credentials).verify()
+        status = .done(result)
+        return result.isOK
     }
 
     private func go(to next: Step) {

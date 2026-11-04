@@ -69,3 +69,21 @@ enum CredentialsStore {
         SecItemAdd(insert as CFDictionary, nil)
     }
 }
+
+/// Reconhece um API token da Atlassian na área de transferência. Serve ao setup, que
+/// oferece colar o token sozinho depois que a pessoa volta da página de criação —
+/// o passo manual é abrir a página, copiar e voltar; colar não precisa ser mais um.
+enum AtlassianToken {
+    static func detect(in text: String) -> String? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !trimmed.contains(where: \.isWhitespace) else { return nil }
+
+        // Os tokens atuais começam com ATATT e são longos; os antigos eram 24
+        // caracteres alfanuméricos, daí a segunda forma.
+        if trimmed.hasPrefix("ATATT"), trimmed.count >= 40 { return trimmed }
+
+        let isAlphanumeric = trimmed.allSatisfy { $0.isLetter || $0.isNumber }
+        let hasBoth = trimmed.contains(where: \.isNumber) && trimmed.contains(where: \.isLetter)
+        return isAlphanumeric && hasBoth && (24...64).contains(trimmed.count) ? trimmed : nil
+    }
+}

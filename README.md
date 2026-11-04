@@ -43,7 +43,12 @@ Quem abre o app sem nada configurado cai numa folha de quatro passos que não d�
 fechar antes do fim: conta do Jira (com link para gerar o API token), projetos, time e
 um guia de três telas sobre como a rodada funciona. O passo da conta só avança depois
 que o Jira aceita a credencial — errar ali deixaria as duas telas seguintes vazias sem
-dizer por quê.
+dizer por quê, e a mensagem separa token inválido de acesso negado pelo SSO.
+
+Quem abre a página de criar o token pelo próprio setup não precisa colar: enquanto essa
+página está aberta, o app observa a área de transferência e, assim que aparece algo com
+forma de API token da Atlassian, preenche o campo e confere sozinho. Só vale para o que
+foi copiado depois de abrir a página, e só com o campo vazio.
 
 O passo do time explica a regra que costuma pegar o time de surpresa: a lista é montada
 a partir de quem está como **responsável por algum card em aberto nos projetos

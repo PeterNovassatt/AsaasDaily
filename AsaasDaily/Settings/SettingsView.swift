@@ -59,8 +59,6 @@ private struct AccountSettings: View {
         isTesting = true
         defer { isTesting = false }
 
-        let client = JiraClient(credentials: settings.credentials)
-        let found = await client.projects()
-        status = found.isEmpty ? "Não consegui autenticar." : "Conectado · \(found.count) projetos"
+        status = await JiraClient(credentials: settings.credentials).verify().message
     }
 }
