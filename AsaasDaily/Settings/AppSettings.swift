@@ -21,6 +21,12 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(appearance.rawValue, forKey: Self.appearanceKey) }
     }
 
+    /// A linha do card pai nos cards. Entra desligada: no quadro ela come uma das três
+    /// linhas úteis do card e costuma repetir o mesmo épico card a card.
+    var showsParent: Bool {
+        didSet { UserDefaults.standard.set(showsParent, forKey: Self.showsParentKey) }
+    }
+
     /// Marcado quando a pessoa termina o setup inicial. Quem já usava o app entra
     /// configurado e nunca vê a folha.
     var setupCompleted: Bool {
@@ -39,6 +45,7 @@ final class AppSettings {
     private static let viewModeKey = "daily.cardsViewMode"
     private static let textScaleKey = "daily.textScale"
     private static let setupKey = "daily.setupCompleted"
+    private static let showsParentKey = "daily.showsParent"
 
     var isConfigured: Bool {
         credentials.isComplete && !projectKeys.isEmpty && people.contains(where: \.isSelected)
@@ -59,6 +66,7 @@ final class AppSettings {
         cardsViewMode = (defaults.string(forKey: Self.viewModeKey))
             .flatMap(CardsViewMode.init(rawValue:)) ?? .list
         setupCompleted = defaults.bool(forKey: Self.setupKey)
+        showsParent = defaults.bool(forKey: Self.showsParentKey)
         appearance = (defaults.string(forKey: Self.appearanceKey))
             .flatMap(AppAppearance.init(rawValue:)) ?? .dark
         people = (defaults.data(forKey: Self.peopleKey))

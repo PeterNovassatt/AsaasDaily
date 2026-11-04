@@ -73,6 +73,7 @@ struct ParticipantBoard: View {
 struct IssueCard: View {
     let issue: JiraIssue
 
+    @Environment(\.showsParent) private var showsParent
     @State private var isHovering = false
 
     private var accentBorder: Color? {
@@ -84,7 +85,7 @@ struct IssueCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
-            if issue.hasParent {
+            if issue.hasParent, showsParent {
                 Label(issue.parentLabel, systemImage: "arrow.turn.down.right")
                     .scaledFont(.caption2)
                     .foregroundStyle(.secondary)

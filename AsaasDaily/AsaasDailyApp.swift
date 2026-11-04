@@ -72,6 +72,9 @@ struct DailyCommands: Commands {
             }
             .keyboardShortcut("r", modifiers: [.command, .shift])
 
+            Toggle("Mostrar épico ou tarefa-pai", isOn: $settings.showsParent)
+                .keyboardShortcut("e", modifiers: .command)
+
             Divider()
 
             // ⌘+ exige shift no teclado, então o sistema enxerga ⌘⇧=; registrar os

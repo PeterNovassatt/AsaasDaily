@@ -128,6 +128,8 @@ struct ParticipantDetail: View {
 struct IssueRow: View {
     let issue: JiraIssue
 
+    @Environment(\.showsParent) private var showsParent
+
     var body: some View {
         HStack(spacing: 10) {
             if issue.isFlagged {
@@ -149,7 +151,7 @@ struct IssueRow: View {
                 Text(issue.summary)
                     .lineLimit(1)
 
-                if issue.hasParent {
+                if issue.hasParent, showsParent {
                     Label(issue.parentLabel, systemImage: "arrow.turn.down.right")
                         .scaledFont(.caption2)
                         .foregroundStyle(.tertiary)

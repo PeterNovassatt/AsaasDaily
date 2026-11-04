@@ -35,7 +35,15 @@ pular, voltar e recarregar os cards de uma pessoa sem refazer a rodada.
 | `⇧⌘P` | modo apresentação |
 | `⌘+` `⌘−` `⌘0` | tamanho do texto |
 | `⌘,` | preferências |
+| `⌘E` | mostrar/ocultar o épico ou a tarefa-pai nos cards |
 | `⌘?` | guia do app |
+
+## O épico nos cards
+
+Os cards podem mostrar uma linha com o card pai — o épico, ou a tarefa mãe quando o card
+é uma subtask. Ela entra **desligada**: no quadro ocupa uma das três linhas úteis do card
+e costuma repetir o mesmo épico card a card, enquanto a daily gira em torno do que a
+pessoa fez e vai fazer. `⌘E` liga e desliga, e a escolha fica salva.
 
 ## Primeira abertura
 

@@ -25,6 +25,7 @@ struct DailyView: View {
             }
         }
         .environment(\.fontScale, settings.textScale.factor)
+        .environment(\.showsParent, settings.showsParent)
         .preferredColorScheme(settings.appearance.colorScheme)
         .modifier(FullScreenSync(isPresenting: Binding(
             get: { daily.isPresenting },

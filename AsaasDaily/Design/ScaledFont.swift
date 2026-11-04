@@ -49,3 +49,17 @@ extension View {
         modifier(ScaledFont(size: size, weight: weight, design: design))
     }
 }
+
+/// Se os cards mostram a linha do card pai (o épico, ou a tarefa mãe de uma subtask).
+/// Vai pelo ambiente porque a linha aparece no quadro, na lista e na apresentação —
+/// propagar por parâmetro atravessaria três níveis de view sem ganho.
+private struct ShowsParentKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var showsParent: Bool {
+        get { self[ShowsParentKey.self] }
+        set { self[ShowsParentKey.self] = newValue }
+    }
+}
