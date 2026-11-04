@@ -20,12 +20,12 @@ APP_X=170
 APPLICATIONS_X=490
 ICONS_Y=220
 
-if [ ! -d "$APP" ]; then
-    echo "▸ Compilando o Release"
-    xcodebuild -project AsaasDaily.xcodeproj -scheme AsaasDaily -configuration Release \
-      -destination 'generic/platform=macOS' -derivedDataPath build/DerivedData \
-      ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO -quiet build
-fi
+# Sempre compila. Reaproveitar um Release que já estava na pasta empacota um binário
+# que ninguém conferiu: foi assim que um .dmg saiu com uma versão de dias antes.
+echo "▸ Compilando o Release"
+xcodebuild -project AsaasDaily.xcodeproj -scheme AsaasDaily -configuration Release \
+  -destination 'generic/platform=macOS' -derivedDataPath build/DerivedData \
+  ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO -quiet build
 
 VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$APP/Contents/Info.plist")
 DMG="$ROOT/dist/$NAME-$VERSION.dmg"
