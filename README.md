@@ -80,6 +80,21 @@ Quando outra pessoa for compilar, troque por assinatura automática
 (`CODE_SIGN_STYLE = Automatic` com o `DEVELOPMENT_TEAM` dela) ou pelo hash do
 certificado dela.
 
+## Distribuição
+
+| Script | O que faz |
+|---|---|
+| `scripts/install.sh` | compila em Release e substitui o app em `/Applications` |
+| `scripts/dist.sh` | gera `dist/AsaasDaily-<versão>.zip` |
+| `scripts/build-dmg.sh` | gera `dist/AsaasDaily-<versão>.dmg`, com o app e o atalho de Aplicativos numa janela desenhada |
+
+O fundo da janela do `.dmg` é gerado por `design/dmg/DmgBackground.swift`, com a mesma
+paleta e a mesma roda do ícone. Na primeira execução o macOS pede para o Terminal
+controlar o Finder — é o Finder que grava o layout da janela do volume.
+
+Com assinatura Apple Development (não Developer ID), quem receber o `.dmg` ainda vê o
+aviso do Gatekeeper na primeira abertura.
+
 ## Requisitos
 
 - macOS 15
