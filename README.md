@@ -103,6 +103,15 @@ controlar o Finder — é o Finder que grava o layout da janela do volume.
 Com assinatura Apple Development (não Developer ID), quem receber o `.dmg` ainda vê o
 aviso do Gatekeeper na primeira abertura.
 
+## Proteção da main
+
+A branch `main` tem um ruleset no GitHub: o dono do repositório (papel de admin)
+continua empurrando direto; qualquer outra pessoa precisa abrir um pull request com
+uma aprovação de code owner, que o `.github/CODEOWNERS` define como o dono.
+
+Apagar a branch e reescrever o histórico (force push) estão bloqueados para todo mundo
+que não seja admin. Uma aprovação é descartada se vier um push novo depois dela.
+
 ## Requisitos
 
 - macOS 15
