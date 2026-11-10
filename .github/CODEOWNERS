@@ -1,0 +1,4 @@
+# Dono de tudo que entra no repositório.
+# Com "require_code_owner_review" no ruleset da main, qualquer PR precisa da
+# aprovação do @PeterNovassatt — não serve a de outro colaborador.
+* @PeterNovassatt
